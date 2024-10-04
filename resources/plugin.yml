@@ -1,0 +1,38 @@
+name: PlayTime
+version: 1.1.2
+main: com.whiteiverson.minecraft.playtime_plugin.Main
+api-version: 1.18
+author: WhiteIverson97
+description: A plugin that saves playtime and gives rewards based on total playtime
+website: 'https://example.com/PlayTime'
+
+commands:
+  pt:
+    description: Main command to check playtime
+    usage: /pt
+    aliases:
+      - playtime
+    permission: playtime.check
+  pttop:
+    description: Shows the top players by playtime
+    usage: '/pttop [page]'
+    aliases:
+      - playtimetop
+    permission: playtime.top
+  ptreload:
+	description: Reload plugin after config changes
+	usage: /ptreload
+	aliases:
+	  - playtimereload
+	permission: playtime.reload
+
+permissions:
+  playtime.check:
+    description: Allows players to check their playtime.
+    default: true
+  playtime.top:
+    description: Allows players to view the top playtime leaderboard.
+    default: true
+  playtime.reload:
+	description: Reload plugin after config changes.
+	default: true

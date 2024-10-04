@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
@@ -50,6 +52,9 @@ public class Main extends JavaPlugin {
         if (getConfig().getBoolean("commands.pttop.enabled")) {
             getCommand("pttop").setExecutor(new PlayTimeTopCommand(this));
         }
+
+        // Register the reload command
+        getCommand("playtime_reload").setExecutor(this);  // Register the command
     }
 
     @Override
@@ -58,6 +63,32 @@ public class Main extends JavaPlugin {
         playTimeHandler.disable();
         rewardsHandler.disable();
         userHandler.disable();
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("playtime_reload")) {
+            if (sender.hasPermission("playtime.reload")) {
+                reloadPlugin();
+                sender.sendMessage("Plugin configuration reloaded successfully.");
+            } else {
+                sender.sendMessage("You do not have permission to use this command.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void reloadPlugin() {
+        // Reload the config
+        reloadConfig();
+        // Logic to reload other components if necessary
+        // For example, if you have a method to reload rewards:
+        if (getConfig().getBoolean("rewards.enabled")) {
+            rewardsHandler.enable();  // Ensure to re-enable if necessary
+        } else {
+            rewardsHandler.disable();  // Disable if the rewards system is no longer enabled
+        }
     }
 
     public PlayTimeHandler getPlayTimeHandler() {

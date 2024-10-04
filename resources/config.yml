@@ -1,0 +1,24 @@
+rewards:
+  enabled: true # Master toggle to enable/disable the rewards system
+  broadcast: true # Whether to broadcast messages to the server when rewards are given
+  reward-cooldown: 60 # Minimum time (in seconds) between processing rewards for the same player
+
+playtime:
+  track-afk: false  # If true, playtime is tracked even when the player is AFK
+  playtime-format: "%d months %d days, %d hours, %d minutes, %d seconds"  # Custom format for how playtime is displayed
+  auto-save-interval: 300  # How often (in seconds) playtime data is auto-saved to the database
+
+commands:
+  pt:
+    enabled: true  # Enable/disable the /pt (playtime) command
+    permission: "playtime.check"  # Required permission to use /pt
+  pttop:
+    enabled: true  # Enable/disable the /pttop command
+    permission: "playtime.top"  # Required permission to view the top playtimes
+  ptreload:
+	enabled: true
+	permission: "playtime.reload"
+
+logging:
+  debug: false  # Enable debug logging
+  reward-claims: true  # Log every reward claim to the server console

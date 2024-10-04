@@ -1,5 +1,7 @@
 package com.whiteiverson.minecraft.playtime_plugin;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -9,6 +11,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -19,15 +23,17 @@ public class UserHandler implements Listener {
     private final Main main;
     private final HashMap<UUID, FileConfiguration> userConfigs = new HashMap<>();
     private final File userDataFolder;
+    private final File rewardsFile;
     private final HashMap<UUID, Long> lastActive = new HashMap<>(); // Track last active time
     private final long afkThreshold = 300000; // 5 minutes in milliseconds
 
     /**
-     * Initializes the UserHandler and sets up the user data directory.
+     * Initialises the UserHandler and sets up the user data directory.
      */
     public UserHandler() {
         this.main = Main.getInstance();
         this.userDataFolder = new File(main.getDataFolder(), "data");
+        this.rewardsFile = new File(main.getDataFolder(), "rewards.yml");
         if (!userDataFolder.exists()) {
             userDataFolder.mkdirs(); // Create data directory if it doesn't exist
         }
@@ -48,12 +54,51 @@ public class UserHandler implements Listener {
      */
     public void loadUserData(UUID uuid) {
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
+        FileConfiguration userConfig;
+
         if (userFile.exists()) {
-            FileConfiguration config = YamlConfiguration.loadConfiguration(userFile);
-            userConfigs.put(uuid, config);
-            main.getLogger().info("Loaded user data for " + uuid);
+            userConfig = YamlConfiguration.loadConfiguration(userFile);
         } else {
-            main.getLogger().warning("User data file not found for " + uuid);
+            try {
+                // Create the file if it doesn't exist
+                userFile.createNewFile();
+
+                // Initialize the configuration
+                userConfig = YamlConfiguration.loadConfiguration(userFile);
+            } catch (IOException e) {
+                main.getLogger().severe("Failed to create user data file for " + uuid + ": " + e.getMessage());
+                return;
+            }
+        }
+
+        // Ensure playtime is present in the config
+        if (!userConfig.contains("playtime")) {
+            userConfig.set("playtime", 0.0); // Initialize play time if not present
+        }
+
+        // Load and initialize rewards for the user
+        loadRewardsForUser(userConfig);
+
+        // Save the updated user config to the file
+        saveUserData(uuid);
+
+        // Store the user config in the userConfigs map
+        userConfigs.put(uuid, userConfig);
+    }
+
+    private void loadRewardsForUser(FileConfiguration userConfig) {
+        FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+
+        // Initialize the rewards section if it doesn't exist
+        if (!userConfig.contains("rewards")) {
+            userConfig.createSection("rewards");
+        }
+
+        // Loop through each reward in the rewards.yml file and initialise to false if not set
+        for (String reward : rewardsConfig.getConfigurationSection("rewards").getKeys(false)) {
+            if (!userConfig.contains("rewards." + reward)) {
+                userConfig.set("rewards." + reward, false);
+            }
         }
     }
 
@@ -64,7 +109,14 @@ public class UserHandler implements Listener {
      * @return The join date as a string or "Date not found" if it doesn't exist.
      */
     public String getUserJoinDate(UUID uuid) {
-        return getUserConfigValue(uuid, "joinDate", "Date not found");
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        if (offlinePlayer.hasPlayedBefore()) {
+            long firstPlayedMillis = offlinePlayer.getFirstPlayed();
+            Date joinDate = new Date(firstPlayedMillis);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            return dateFormat.format(joinDate); // Return formatted date as String
+        }
+        return "Date not found"; // Return a message if the player has never played before
     }
 
     /**
@@ -80,12 +132,13 @@ public class UserHandler implements Listener {
     /**
      * A generic method to retrieve user configuration values with a safe cast.
      *
-     * @param uuid        The UUID of the user.
-     * @param key         The key for the data.
+     * @param uuid         The UUID of the user.
+     * @param key          The key for the data.
      * @param defaultValue The default value if the key doesn't exist.
-     * @param <T>        The type of the value.
+     * @param <T>         The type of the value.
      * @return The value associated with the key, or the default value if not found.
      */
+    @SuppressWarnings("unchecked")
     private <T> T getUserConfigValue(UUID uuid, String key, T defaultValue) {
         FileConfiguration config = userConfigs.get(uuid);
         if (config != null) {
@@ -134,8 +187,7 @@ public class UserHandler implements Listener {
         FileConfiguration config = userConfigs.get(uuid);
         if (config != null) {
             try {
-                config.save(userFile);
-                main.getLogger().info("Saved user data for " + uuid);
+                config.save(userFile); // Save the updated config to the user's data file
             } catch (IOException e) {
                 main.getLogger().severe("Failed to save user data for " + uuid + ": " + e.getMessage());
                 e.printStackTrace();
@@ -182,5 +234,15 @@ public class UserHandler implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         updateLastActive(event.getPlayer().getUniqueId()); // Update last active time on movement
+    }
+
+    /**
+     * Update the player's total playtime in their .yml file.
+     *
+     * @param uuid     The player's UUID.
+     * @param playtime The new playtime value to set.
+     */
+    public void updatePlaytime(UUID uuid, double playtime) {
+        setUserData(uuid, "playtime", playtime); // Setting playtime in the config
     }
 }

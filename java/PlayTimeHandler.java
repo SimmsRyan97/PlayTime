@@ -1,18 +1,17 @@
 package com.whiteiverson.minecraft.playtime_plugin;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.io.BukkitObjectInputStream;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class PlayTimeHandler {
     private Main main; // Reference to the main plugin instance
@@ -47,7 +46,7 @@ public class PlayTimeHandler {
         // Schedule the auto-save task
         Bukkit.getScheduler().runTaskTimer(main, this::autoSavePlaytimeData, autoSaveInterval * 20L, autoSaveInterval * 20L);
     }
-
+    
     public void processPlayers() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
@@ -58,13 +57,14 @@ public class PlayTimeHandler {
 
             // Check if the user file exists
             if (playtime == 0) {
-                // If the file doesn't exist, retrieve playtime from world files
+                // If the file doesn't exist, retrieve play time from world files
                 playtime = retrievePlaytimeFromWorldFiles(uuid);
-                userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved playtime
+                userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved play time
             }
 
-            if (!trackAfk || !userHandler.isAfk(uuid)) { // Check if tracking AFK time is enabled
-                playtime += 1; // Increment play time
+            // Increment play time by 1 second if AFK tracking is disabled or player is not AFK
+            if (!trackAfk || !userHandler.isAfk(uuid)) { 
+                playtime += 1; // Increment play time by 1 second
                 userHandler.setUserData(uuid, "playtime", playtime); // Update play time in UserHandler
             }
 
@@ -72,26 +72,46 @@ public class PlayTimeHandler {
         }
     }
 
+    // Get play time from server files as initial value
     private double retrievePlaytimeFromWorldFiles(UUID uuid) {
-        // Define the path to the player data file
-        File worldDir = new File(main.getServer().getWorlds().get(0).getWorldFolder(), "playerdata");
-        File playerFile = new File(worldDir, uuid.toString() + ".dat");
+        // Get the first world
+        World world = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
 
-        if (playerFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(playerFile)) {
-                CompoundTag nbtData = NbtIo.readCompressed(fis);
-
-                // Retrieve playtime from the appropriate tag
-                if (nbtData.contains("PlayTime")) {
-                    long playTime = nbtData.getLong("PlayTime"); // Playtime is usually in ticks
-                    return playTime / 20.0; // Convert ticks to seconds (1 tick = 1/20 seconds)
-                }
-            } catch (IOException e) {
-                main.getLogger().severe("Failed to read player data file for UUID " + uuid + ": " + e.getMessage());
-            }
+        // Return 0 if no world is loaded
+        if (world == null) {
+            Bukkit.getLogger().warning("No worlds found, unable to retrieve playtime for UUID: " + uuid);
+            return 0;
         }
 
-        return 0; // Return 0 if file does not exist or if unable to retrieve playtime
+        // Define the path to the player's stats file
+        File statsDir = new File(world.getWorldFolder(), "stats");
+        File playerFile = new File(statsDir, uuid.toString() + ".json");
+
+        // Check if the file exists before reading
+        if (playerFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(playerFile))) {
+                // Parse the JSON file
+                JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+
+                // Navigate to the play time within "stats.minecraft:custom.minecraft:play_time"
+                if (json.has("stats")) {
+                    JsonObject stats = json.getAsJsonObject("stats");
+                    if (stats.has("minecraft:custom")) {
+                        JsonObject customStats = stats.getAsJsonObject("minecraft:custom");
+                        if (customStats.has("minecraft:play_time")) {
+                            long playTimeTicks = customStats.get("minecraft:play_time").getAsLong();
+                            return playTimeTicks / 20.0; // Convert ticks to seconds
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().severe("Failed to read player stats file for UUID " + uuid + ": " + e.getMessage());
+            }
+        } else {
+            Bukkit.getLogger().warning("Stats file not found for UUID: " + uuid);
+        }
+
+        return 0; // Return 0 if the file does not exist or there was an issue
     }
 
     private void autoSavePlaytimeData() {
