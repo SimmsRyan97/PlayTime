@@ -93,7 +93,7 @@ public class RewardsHandler {
 
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast")) {
-                    Bukkit.broadcastMessage(player.getName() + " has earned a reward: " + reward.getName());
+                	Bukkit.broadcastMessage(player.getName() + " has earned the reward:\n" + reward.getName());
                 }
 
                 // Update last reward processing time

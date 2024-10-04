@@ -63,7 +63,7 @@ public class UserHandler implements Listener {
                 // Create the file if it doesn't exist
                 userFile.createNewFile();
 
-                // Initialize the configuration
+                // Initialise the configuration
                 userConfig = YamlConfiguration.loadConfiguration(userFile);
             } catch (IOException e) {
                 main.getLogger().severe("Failed to create user data file for " + uuid + ": " + e.getMessage());
@@ -71,12 +71,12 @@ public class UserHandler implements Listener {
             }
         }
 
-        // Ensure playtime is present in the config
+        // Ensure play time is present in the config
         if (!userConfig.contains("playtime")) {
-            userConfig.set("playtime", 0.0); // Initialize play time if not present
+            userConfig.set("playtime", 0.0); // Initialise play time if not present
         }
 
-        // Load and initialize rewards for the user
+        // Load and initialise rewards for the user
         loadRewardsForUser(userConfig);
 
         // Save the updated user config to the file
@@ -89,7 +89,7 @@ public class UserHandler implements Listener {
     private void loadRewardsForUser(FileConfiguration userConfig) {
         FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
 
-        // Initialize the rewards section if it doesn't exist
+        // Initialise the rewards section if it doesn't exist
         if (!userConfig.contains("rewards")) {
             userConfig.createSection("rewards");
         }
@@ -237,10 +237,10 @@ public class UserHandler implements Listener {
     }
 
     /**
-     * Update the player's total playtime in their .yml file.
+     * Update the player's total play time in their .yml file.
      *
      * @param uuid     The player's UUID.
-     * @param playtime The new playtime value to set.
+     * @param playtime The new play time value to set.
      */
     public void updatePlaytime(UUID uuid, double playtime) {
         setUserData(uuid, "playtime", playtime); // Setting playtime in the config

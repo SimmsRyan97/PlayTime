@@ -27,6 +27,8 @@ commands:
 	permission: playtime.reload
 
 permissions:
+  playtime.*:
+    default: false
   playtime.check:
     description: Allows players to check their playtime.
     default: true
@@ -35,4 +37,4 @@ permissions:
     default: true
   playtime.reload:
 	description: Reload plugin after config changes.
-	default: true
+	default: false
