@@ -54,7 +54,7 @@ public class Main extends JavaPlugin {
         }
 
         // Register the reload command
-        getCommand("playtime_reload").setExecutor(this);  // Register the command
+        getCommand("ptreload").setExecutor(this);  // Register the command
     }
 
     @Override
@@ -67,7 +67,7 @@ public class Main extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("playtime_reload")) {
+        if (cmd.getName().equalsIgnoreCase("ptreload")) {
             if (sender.hasPermission("playtime.reload")) {
                 reloadPlugin();
                 sender.sendMessage("Plugin configuration reloaded successfully.");

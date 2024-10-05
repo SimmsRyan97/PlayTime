@@ -29,6 +29,10 @@ commands:
 permissions:
   playtime.*:
     default: false
+    children:
+      playtime.check: true
+      playtime.top: true
+      playtime.reload: true
   playtime.check:
     description: Allows players to check their playtime.
     default: true
