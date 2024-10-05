@@ -1,5 +1,5 @@
 name: PlayTime
-version: 1.1.2
+version: 1.1.4
 main: com.whiteiverson.minecraft.playtime_plugin.Main
 api-version: 1.18
 author: WhiteIverson97
@@ -20,11 +20,11 @@ commands:
       - playtimetop
     permission: playtime.top
   ptreload:
-	description: Reload plugin after config changes
-	usage: /ptreload
-	aliases:
-	  - playtimereload
-	permission: playtime.reload
+    description: Reload plugin after config changes
+    usage: /ptreload
+    aliases:
+      - playtimereload
+    permission: playtime.reload
 
 permissions:
   playtime.*:
@@ -36,5 +36,5 @@ permissions:
     description: Allows players to view the top playtime leaderboard.
     default: true
   playtime.reload:
-	description: Reload plugin after config changes.
-	default: false
+    description: Reload plugin after config changes.
+    default: false

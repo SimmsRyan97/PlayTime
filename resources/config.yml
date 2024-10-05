@@ -16,8 +16,8 @@ commands:
     enabled: true  # Enable/disable the /pttop command
     permission: "playtime.top"  # Required permission to view the top playtimes
   ptreload:
-	enabled: true
-	permission: "playtime.reload"
+    enabled: true
+    permission: "playtime.reload"
 
 logging:
   debug: false  # Enable debug logging
