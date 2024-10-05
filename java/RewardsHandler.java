@@ -21,12 +21,9 @@ public class RewardsHandler {
         main = Main.getInstance();
         setupRewards();
     }
-
-    /**
-     * Disables the reward system, providing a placeholder for future cleanup tasks.
-     */
+    
     public void disable() {
-        // Cleanup tasks if necessary
+    	//TODO Add disabling of tasks if needed
     }
 
     /**
@@ -76,12 +73,10 @@ public class RewardsHandler {
         long currentTime = System.currentTimeMillis();
 
         // Check cooldown to avoid frequent processing
-        if (main.getRewardCooldowns().containsKey(uuid)) {
-            long lastProcessedTime = main.getRewardCooldowns().get(uuid);
-            int cooldown = main.getConfig().getInt("rewards.reward-cooldown", 0) * MILLISECONDS_IN_SECOND; // Convert to milliseconds
-            if ((currentTime - lastProcessedTime) < cooldown) {
-                return; // Skip processing if still within cooldown period
-            }
+        long lastProcessedTime = main.getRewardCooldowns().getOrDefault(uuid, 0L);
+        int cooldown = main.getConfig().getInt("rewards.reward-cooldown", 0) * MILLISECONDS_IN_SECOND;
+        if ((currentTime - lastProcessedTime) < cooldown) {
+            return; // Skip processing if still within cooldown period
         }
 
         // Iterate over each reward
@@ -93,7 +88,7 @@ public class RewardsHandler {
 
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast")) {
-                	Bukkit.broadcastMessage(player.getName() + " has earned the reward:\n" + reward.getName());
+                    Bukkit.broadcastMessage(player.getName() + " has earned the reward: " + reward.getName());
                 }
 
                 // Update last reward processing time
@@ -110,7 +105,6 @@ public class RewardsHandler {
      */
     private void executeRewardCommands(Player player, Rewards reward) {
         for (String command : reward.getCommands()) {
-            // Replace placeholder %player% with the player's actual name
             String processedCommand = command.replace("%player%", player.getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand); // Execute command as console
         }
@@ -124,7 +118,6 @@ public class RewardsHandler {
      * @return True if the reward has been claimed, false otherwise.
      */
     private boolean hasRewardBeenClaimed(UUID uuid, Rewards reward) {
-        // Update: Check if the reward is claimed in the rewards.claimed section
         return main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName()) instanceof Boolean
                 && (Boolean) main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName());
     }
@@ -137,7 +130,6 @@ public class RewardsHandler {
      * @param claimed Whether the reward has been claimed.
      */
     private void markRewardAsClaimed(UUID uuid, Rewards reward, boolean claimed) {
-        // Update: Store reward claim status under rewards.claimed in the user file
         main.getUserHandler().setUserData(uuid, "rewards.claimed." + reward.getName(), claimed);
     }
 
