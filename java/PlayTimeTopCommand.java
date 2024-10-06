@@ -21,40 +21,15 @@ public class PlayTimeTopCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Check if command is enabled
-        boolean enabled = main.getConfig().getBoolean("commands.pttop.enabled", true);
-        
-        // Check if the command is enabled
-        if (!enabled) {
-            sender.sendMessage(ChatColor.RED + "This command is currently disabled.");
-            return true;
-        }
-    	
-        // Retrieve the permission from the config.yml
-        String permission = main.getConfig().getString("commands.pttop.permission", "playtime.top");
-
-        // Check if the sender has the necessary permission
-        if (!sender.hasPermission(permission)) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
-            return true;
-        }
+        if (!isCommandEnabled(sender)) return true;
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be executed by a player.");
+            sender.sendMessage(ChatColor.RED + "This command can only be executed by a player.");
             return true;
         }
 
         Player player = (Player) sender;
-        int page = 1;
-
-        if (args.length > 0) {
-            try {
-                page = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                player.sendMessage(ChatColor.RED + "Invalid page number. Showing page 1.");
-            }
-        }
-
+        int page = parsePageNumber(args, player);
         List<UUID> sortedPlayers = getSortedPlayers();
         int totalPlayers = sortedPlayers.size();
         int totalPages = (int) Math.ceil((double) totalPlayers / PAGE_SIZE);
@@ -69,78 +44,72 @@ public class PlayTimeTopCommand implements CommandExecutor {
             return true;
         }
 
-        // Sending the page title in gold
+        sendPlaytimeList(player, sortedPlayers, page, totalPages);
+        return true;
+    }
+
+    private boolean isCommandEnabled(CommandSender sender) {
+        boolean enabled = main.getConfig().getBoolean("commands.pttop.enabled", true);
+        if (!enabled) {
+            sender.sendMessage(ChatColor.RED + "This command is currently disabled.");
+        } else {
+            String permission = main.getConfig().getString("commands.pttop.permission", "playtime.top");
+            if (!sender.hasPermission(permission)) {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+                return false;
+            }
+        }
+        return enabled;
+    }
+
+    private int parsePageNumber(String[] args, Player player) {
+        int page = 1;
+        if (args.length > 0) {
+            try {
+                page = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Invalid page number. Showing page 1.");
+            }
+        }
+        return page;
+    }
+
+    private void sendPlaytimeList(Player player, List<UUID> sortedPlayers, int page, int totalPages) {
         player.sendMessage(ChatColor.GOLD + "=== Top Playtime (Page " + page + "/" + totalPages + ") ===");
 
         int startIndex = (page - 1) * PAGE_SIZE;
-        int endIndex = Math.min(startIndex + PAGE_SIZE, totalPlayers);
+        int endIndex = Math.min(startIndex + PAGE_SIZE, sortedPlayers.size());
 
-        // Initialise the rank number based on the starting index.
         for (int i = startIndex; i < endIndex; i++) {
             UUID uuid = sortedPlayers.get(i);
             String playerName = Bukkit.getOfflinePlayer(uuid).getName();
             double playtime = main.getUserHandler().getPlaytime(uuid);
-
-            // The rank is calculated as i + 1 because 'i' is zero-based
-            int rank = i + 1;
-
-            // Send the message with the rank, player name, and formatted play time
-            player.sendMessage(rank + ". " + playerName + ": " + formatPlaytime(playtime));
+            player.sendMessage((i + 1) + ". " + playerName + ": " + formatPlaytime(playtime));
         }
 
         if (page < totalPages) {
             player.sendMessage(ChatColor.GOLD + "========= Go to page " + (page + 1) + " =========");
         } else {
-            player.sendMessage(ChatColor.GOLD + "===============================");
+            player.sendMessage(ChatColor.GOLD + "===========================");
         }
-
-        return true;
     }
 
     private List<UUID> getSortedPlayers() {
-        Map<UUID, Double> playerPlaytimeMap = new HashMap<>();
-
-        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-            UUID uuid = offlinePlayer.getUniqueId();
-            double playtime = main.getUserHandler().getPlaytime(uuid);
-
-            // Only include players with play time greater than 0
-            if (playtime > 0) {
-                playerPlaytimeMap.put(uuid, playtime);
-            }
-        }
-
-        return playerPlaytimeMap.entrySet().stream()
-            .sorted(Map.Entry.<UUID, Double>comparingByValue().reversed())
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+        return Arrays.stream(Bukkit.getOfflinePlayers())
+                .map(OfflinePlayer::getUniqueId)
+                .filter(uuid -> main.getUserHandler().getPlaytime(uuid) > 0)
+                .sorted(Comparator.comparingDouble(main.getUserHandler()::getPlaytime).reversed())
+                .collect(Collectors.toList());
     }
 
     private String formatPlaytime(double playtime) {
-        // Fetch play time in seconds
-        long totalSeconds = (long) playtime;  // Play time is already in seconds
-
-        // Define time constants
-        long secondsInAMinute = 60;
-        long secondsInAnHour = 3600; // 60 * 60
-        long secondsInADay = 86400;  // 60 * 60 * 24
-        long secondsInAMonth = 2592000; // Approximation: 30 days * 24 hours * 60 minutes * 60 seconds
-
-        long months = totalSeconds / secondsInAMonth;
-        long remainingSecondsAfterMonths = totalSeconds % secondsInAMonth;
-        long days = remainingSecondsAfterMonths / secondsInADay;
-        long remainingSecondsAfterDays = remainingSecondsAfterMonths % secondsInADay;
-        long hours = remainingSecondsAfterDays / secondsInAnHour;
-        long remainingSecondsAfterHours = remainingSecondsAfterDays % secondsInAnHour;
-        long minutes = remainingSecondsAfterHours / secondsInAMinute;
-        long seconds = remainingSecondsAfterHours % secondsInAMinute;
-
-        // Formatting play time with green colour and singular/plural
-        return ChatColor.GREEN + String.format("%d %s, %d %s, %d %s, %d %s, %d %s",
-                months, months == 1 ? "month" : "months",
-                days, days == 1 ? "day" : "days",
-                hours, hours == 1 ? "hour" : "hours",
-                minutes, minutes == 1 ? "minute" : "minutes",
-                seconds, seconds == 1 ? "second" : "seconds");
+        long totalSeconds = (long) playtime;
+        Map<String, String> timeComponents = Main.calculatePlaytime(totalSeconds);
+        return String.format("%s %s, %s %s, %s %s, %s %s, %s %s",
+                timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
+                timeComponents.get("greenDays"), timeComponents.get("daysString"),
+                timeComponents.get("greenHours"), timeComponents.get("hoursString"),
+                timeComponents.get("greenMinutes"), timeComponents.get("minutesString"),
+                timeComponents.get("greenSeconds"), timeComponents.get("secondsString"));
     }
 }

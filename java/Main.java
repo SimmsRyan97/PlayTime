@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,6 +27,8 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        getLogger().info("PlayTime plugin is loading...");
+
         // Load config.yml
         saveDefaultConfig();
 
@@ -34,27 +38,36 @@ public class Main extends JavaPlugin {
 
         // Initialise handlers
         playTimeHandler.enable();
-
-        // Enable rewards only if rewards system is enabled in config
-        if (getConfig().getBoolean("rewards.enabled")) {
-            rewardsHandler.enable();
-        }
-
         userHandler.enable();
+        manageRewards();
 
         // Register event listeners
         getServer().getPluginManager().registerEvents(userHandler, this);
 
         // Enable commands based on config
-        if (getConfig().getBoolean("commands.pt.enabled")) {
-            getCommand("pt").setExecutor(new PlayTimeCommand(this));
-        }
-        if (getConfig().getBoolean("commands.pttop.enabled")) {
-            getCommand("pttop").setExecutor(new PlayTimeTopCommand(this));
-        }
+        registerCommands();
 
-        // Register the reload command
-        getCommand("ptreload").setExecutor(this);  // Register the command
+        getLogger().info("PlayTime plugin loaded successfully!");
+    }
+
+    private void registerCommands() {
+        registerCommand("pt", new PlayTimeCommand(this));
+        registerCommand("pttop", new PlayTimeTopCommand(this));
+        registerCommand("ptreload", this);
+    }
+
+    private void registerCommand(String command, Object executor) {
+        if (getCommand(command) != null) {
+            getCommand(command).setExecutor((CommandExecutor) executor);
+        }
+    }
+
+    private void manageRewards() {
+        if (getConfig().getBoolean("rewards.enabled", true)) {
+            rewardsHandler.enable();
+        } else {
+            rewardsHandler.disable();
+        }
     }
 
     @Override
@@ -63,16 +76,19 @@ public class Main extends JavaPlugin {
         playTimeHandler.disable();
         rewardsHandler.disable();
         userHandler.disable();
+        instance = null;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("ptreload")) {
+    	getLogger().info("Command received: " + cmd.getName());
+    	
+        if ("ptreload".equalsIgnoreCase(cmd.getName())) {
             if (sender.hasPermission("playtime.reload")) {
                 reloadPlugin();
-                sender.sendMessage("Plugin configuration reloaded successfully.");
+                sender.sendMessage(ChatColor.GREEN + "Plugin configuration reloaded successfully.");
             } else {
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
             }
             return true;
         }
@@ -80,17 +96,51 @@ public class Main extends JavaPlugin {
     }
 
     private void reloadPlugin() {
-        // Reload the config
         reloadConfig();
-        // Logic to reload other components if necessary
-        // For example, if you have a method to reload rewards:
-        if (getConfig().getBoolean("rewards.enabled")) {
-            rewardsHandler.enable();  // Ensure to re-enable if necessary
-        } else {
-            rewardsHandler.disable();  // Disable if the rewards system is no longer enabled
-        }
+        manageRewards(); // Reload the reward system as well
     }
+    
+    // Helper method to calculate time components and handle plural/singular formatting
+    public static Map<String, String> calculatePlaytime(long totalSeconds) {
+        // Time constants
+        long secondsInAMinute = 60;
+        long secondsInAnHour = 3600;
+        long secondsInADay = 86400;
+        long secondsInAMonth = 2592000; // Approximation for 30 days
 
+        // Calculate months, days, hours, minutes, and seconds
+        long months = totalSeconds / secondsInAMonth;
+        long remainingSecondsAfterMonths = totalSeconds % secondsInAMonth;
+        long days = remainingSecondsAfterMonths / secondsInADay;
+        long remainingSecondsAfterDays = remainingSecondsAfterMonths % secondsInADay;
+        long hours = remainingSecondsAfterDays / secondsInAnHour;
+        long remainingSecondsAfterHours = remainingSecondsAfterDays % secondsInAnHour;
+        long minutes = remainingSecondsAfterHours / secondsInAMinute;
+        long seconds = remainingSecondsAfterHours % secondsInAMinute;
+
+        // Green strings with colour coding
+        String greenMonths = ChatColor.GREEN + String.valueOf(months) + ChatColor.RESET;
+        String greenDays = ChatColor.GREEN + String.valueOf(days) + ChatColor.RESET;
+        String greenHours = ChatColor.GREEN + String.valueOf(hours) + ChatColor.RESET;
+        String greenMinutes = ChatColor.GREEN + String.valueOf(minutes) + ChatColor.RESET;
+        String greenSeconds = ChatColor.GREEN + String.valueOf(seconds) + ChatColor.RESET;
+
+        // Plural/singular formatting
+        Map<String, String> timeComponents = new HashMap<>();
+        timeComponents.put("greenMonths", greenMonths);
+        timeComponents.put("greenDays", greenDays);
+        timeComponents.put("greenHours", greenHours);
+        timeComponents.put("greenMinutes", greenMinutes);
+        timeComponents.put("greenSeconds", greenSeconds);
+        timeComponents.put("monthsString", months == 1 ? "month" : "months");
+        timeComponents.put("daysString", days == 1 ? "day" : "days");
+        timeComponents.put("hoursString", hours == 1 ? "hour" : "hours");
+        timeComponents.put("minutesString", minutes == 1 ? "minute" : "minutes");
+        timeComponents.put("secondsString", seconds == 1 ? "second" : "seconds");
+
+        return timeComponents;
+    }
+    
     public PlayTimeHandler getPlayTimeHandler() {
         return playTimeHandler;
     }

@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayTimeCommand implements CommandExecutor {
@@ -44,7 +45,7 @@ public class PlayTimeCommand implements CommandExecutor {
                 playerName = "You"; // Set to "You" for self-query
                 joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
             } else {
-                sender.sendMessage("You must be a player to use this command.");
+            	sender.sendMessage(ChatColor.RED + "This command can only be executed by a player.");
                 return true;
             }
         } else {
@@ -85,49 +86,32 @@ public class PlayTimeCommand implements CommandExecutor {
         double playtime = main.getUserHandler().getPlaytime(targetUUID);
 
         // Calculate months, days, hours, minutes, and seconds from play time
-        long totalSeconds = (long) playtime;  // Play time is already in seconds
-
-        // Define time constants
-        long secondsInAMinute = 60;
-        long secondsInAnHour = 3600; // 60 * 60
-        long secondsInADay = 86400;  // 60 * 60 * 24
-        long secondsInAMonth = 2592000; // Approximation: 30 days * 24 hours * 60 minutes * 60 seconds
-
-        long months = totalSeconds / secondsInAMonth;
-        long remainingSecondsAfterMonths = totalSeconds % secondsInAMonth;
-        long days = remainingSecondsAfterMonths / secondsInADay;
-        long remainingSecondsAfterDays = remainingSecondsAfterMonths % secondsInADay;
-        long hours = remainingSecondsAfterDays / secondsInAnHour;
-        long remainingSecondsAfterHours = remainingSecondsAfterDays % secondsInAnHour;
-        long minutes = remainingSecondsAfterHours / secondsInAMinute;
-        long seconds = remainingSecondsAfterHours % secondsInAMinute;
-
-        // Construct the message with green numbers
-        String message;
-        String greenMonths = ChatColor.GREEN + String.valueOf(months) + ChatColor.RESET;
-        String greenDays = ChatColor.GREEN + String.valueOf(days) + ChatColor.RESET;
-        String greenHours = ChatColor.GREEN + String.valueOf(hours) + ChatColor.RESET;
-        String greenMinutes = ChatColor.GREEN + String.valueOf(minutes) + ChatColor.RESET;
-        String greenSeconds = ChatColor.GREEN + String.valueOf(seconds) + ChatColor.RESET;
+        long totalSeconds = (long) playtime;
+        
+        // Fetch the time components using the helper method
+        Map<String, String> timeComponents = Main.calculatePlaytime(totalSeconds);
+        
         String greenDate = ChatColor.GREEN + joinDate + ChatColor.RESET;
-
-        // Create time strings with singular/plural handling
-        String monthsString = months + " " + (months == 1 ? "month" : "months");
-        String daysString = days + " " + (days == 1 ? "day" : "days");
-        String hoursString = hours + " " + (hours == 1 ? "hour" : "hours");
-        String minutesString = minutes + " " + (minutes == 1 ? "minute" : "minutes");
-        String secondsString = seconds + " " + (seconds == 1 ? "second" : "seconds");
+        String message;
 
         if (playerName.equals("You")) {
-            message = String.format("Your playtime is %s, %s, %s, %s, and %s. You joined on %s.",
-                    greenMonths + " " + monthsString, greenDays + " " + daysString,
-                    greenHours + " " + hoursString, greenMinutes + " " + minutesString,
-                    greenSeconds + " " + secondsString, greenDate);
+            message = String.format("Your playtime is %s %s, %s %s, %s %s, %s %s, and %s %s. You joined on %s.",
+	                    timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
+	                    timeComponents.get("greenDays"), timeComponents.get("daysString"),
+	                    timeComponents.get("greenHours"), timeComponents.get("hoursString"),
+	                    timeComponents.get("greenMinutes"), timeComponents.get("minutesString"),
+	                    timeComponents.get("greenSeconds"), timeComponents.get("secondsString"),
+	                    greenDate
+                    );
         } else {
-            message = String.format("%s's playtime is %s, %s, %s, %s, and %s. They joined on %s.",
-                    playerName, greenMonths + " " + monthsString, greenDays + " " + daysString,
-                    greenHours + " " + hoursString, greenMinutes + " " + minutesString,
-                    greenSeconds + " " + secondsString, greenDate);
+            message = String.format("%s's playtime is %s %s, %s %s, %s %s, %s %s, and %s %s. They joined on %s.",
+	                    playerName, timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
+	                    timeComponents.get("greenDays"), timeComponents.get("daysString"),
+	                    timeComponents.get("greenHours"), timeComponents.get("hoursString"),
+	                    timeComponents.get("greenMinutes"), timeComponents.get("minutesString"),
+	                    timeComponents.get("greenSeconds"), timeComponents.get("secondsString"),
+	                    greenDate
+                    );
         }
 
         // Send the message to the sender

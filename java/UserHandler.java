@@ -4,7 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +39,11 @@ public class UserHandler implements Listener {
     }
     
     public void enable() {
-    	//TODO Add enabling of tasks if needed
+        //TODO Add enabling of tasks if needed
     }
     
     public void disable() {
-    	//TODO Add disabling of tasks if needed
+        //TODO Add disabling of tasks if needed
     }
 
     /**
@@ -57,6 +59,7 @@ public class UserHandler implements Listener {
             userConfig = YamlConfiguration.loadConfiguration(userFile);
         } else {
             try {
+                main.getLogger().info("Creating new data file for user: " + uuid);
                 userFile.createNewFile();
                 userConfig = YamlConfiguration.loadConfiguration(userFile);
             } catch (IOException e) {
@@ -65,13 +68,12 @@ public class UserHandler implements Listener {
             }
         }
 
-        // Ensure playtime is present in the config
         if (!userConfig.contains("playtime")) {
-            userConfig.set("playtime", 0.0); // Initialise playtime if not present
+            userConfig.set("playtime", 0.0);  // Initialise playtime
+            main.getLogger().info("Setting initial playtime for user: " + uuid);
         }
 
         loadRewardsForUser(userConfig);
-
         saveUserData(uuid);
         userConfigs.put(uuid, userConfig);
     }
@@ -85,11 +87,13 @@ public class UserHandler implements Listener {
         }
 
         // Loop through each reward in the rewards.yml file and initialise to false if not set
-        rewardsConfig.getConfigurationSection("rewards").getKeys(false).forEach(reward -> {
-            if (!userConfig.contains("rewards." + reward)) {
-                userConfig.set("rewards." + reward, false);
-            }
-        });
+        if (rewardsConfig.contains("rewards")) {
+            rewardsConfig.getConfigurationSection("rewards").getKeys(false).forEach(reward -> {
+                if (!userConfig.contains("rewards." + reward)) {
+                    userConfig.set("rewards." + reward, false);
+                }
+            });
+        }
     }
 
     /**
@@ -100,11 +104,16 @@ public class UserHandler implements Listener {
      */
     public String getUserJoinDate(UUID uuid) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        
         if (offlinePlayer.hasPlayedBefore()) {
+            // If the player has played before, return their first played date
             Date joinDate = new Date(offlinePlayer.getFirstPlayed());
             return new SimpleDateFormat("dd.MM.yyyy").format(joinDate);
+        } else {
+            // If the player hasn't played before, return today's date
+            Date currentDate = new Date();
+            return new SimpleDateFormat("dd.MM.yyyy").format(currentDate);
         }
-        return "Date not found"; // Return if player never played
     }
 
     /**
@@ -125,7 +134,12 @@ public class UserHandler implements Listener {
      * @return The value associated with the key, or null if not found.
      */
     public Object getUserData(UUID uuid, String key) {
-        return userConfigs.get(uuid).get(key);
+        FileConfiguration userConfig = userConfigs.get(uuid);
+        if (userConfig == null) {
+            loadUserData(uuid);  // Load the user's data if it wasn't loaded
+            userConfig = userConfigs.get(uuid);
+        }
+        return userConfig != null ? userConfig.get(key) : null;
     }
 
     /**
@@ -136,8 +150,17 @@ public class UserHandler implements Listener {
      * @param value The value to be set.
      */
     public void setUserData(UUID uuid, String key, Object value) {
-        userConfigs.get(uuid).set(key, value);
-        saveUserData(uuid);
+        FileConfiguration userConfig = userConfigs.get(uuid);
+        if (userConfig == null) {
+            loadUserData(uuid);  // Load the user's data if it wasn't loaded
+            userConfig = userConfigs.get(uuid);
+        }
+        if (userConfig != null) {
+            userConfig.set(key, value);
+            saveUserData(uuid);
+        } else {
+            main.getLogger().severe("Failed to set user data. Configuration for user " + uuid + " is not initialized.");
+        }
     }
 
     /**
@@ -149,10 +172,16 @@ public class UserHandler implements Listener {
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
         FileConfiguration userConfig = userConfigs.get(uuid);
 
+        // Check if the userConfig is null
+        if (userConfig == null) {
+            return;
+        }
+
         try {
             userConfig.save(userFile);
         } catch (IOException e) {
             main.getLogger().severe("Failed to save user data for " + uuid + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -165,7 +194,12 @@ public class UserHandler implements Listener {
      * @return The value associated with the path, or the default value if not found.
      */
     public double getUserConfigValue(UUID uuid, String path, double def) {
-        return userConfigs.get(uuid).getDouble(path, def);
+        FileConfiguration userConfig = userConfigs.get(uuid);
+        if (userConfig == null) {
+            loadUserData(uuid);  // Load the user's data if it wasn't loaded
+            userConfig = userConfigs.get(uuid);
+        }
+        return userConfig != null ? userConfig.getDouble(path, def) : def;
     }
 
     /**
@@ -186,5 +220,21 @@ public class UserHandler implements Listener {
      */
     public boolean isAfk(UUID uuid) {
         return (System.currentTimeMillis() - lastActive.getOrDefault(uuid, 0L)) > afkThreshold;
+    }
+
+    /**
+     * Handles player join events to load user data.
+     *
+     * @param event The player join event.
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        loadUserData(uuid);  // Ensure data is loaded on join
+
+        // Log to verify userConfig is correctly loaded
+        if (userConfigs.get(uuid) == null) {
+            main.getLogger().severe("User config for UUID " + uuid + " is still null after loading.");
+        }
     }
 }

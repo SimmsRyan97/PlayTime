@@ -50,29 +50,35 @@ public class PlayTimeHandler {
     public void processPlayers() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
-            
+
             // Load user data for the player
-            userHandler.loadUserData(uuid); 
+            userHandler.loadUserData(uuid);
             
+            // Check if user data was successfully loaded
+            if (userHandler.getUserData(uuid, "playtime") == null) {
+                main.getLogger().severe("User data for " + uuid + " could not be loaded. Skipping player.");
+                continue; // Skip processing for this player
+            }
+
             // Update the last active time for AFK tracking
             userHandler.setLastActive(uuid, System.currentTimeMillis());
 
-            // Get playtime from UserHandler
+            // Get play time from UserHandler
             double playtime = userHandler.getUserConfigValue(uuid, "playtime", 0);
 
-            // If the user has no recorded playtime, retrieve it from world files
+            // If the user has no recorded play time, retrieve it from world files
             if (playtime == 0) {
                 playtime = retrievePlaytimeFromWorldFiles(uuid);
-                userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved playtime
+                userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved play time
             }
 
-            // Increment playtime only if AFK tracking is disabled or the player is not AFK
+            // Increment play time only if AFK tracking is disabled or the player is not AFK
             if (!trackAfk || !userHandler.isAfk(uuid)) {
-                playtime += 1; // Increment playtime by 1 second
-                userHandler.setUserData(uuid, "playtime", playtime); // Update playtime in UserHandler
+                playtime += 1; // Increment play time by 1 second
+                userHandler.setUserData(uuid, "playtime", playtime); // Update play time in UserHandler
             }
 
-            // Process rewards for the player based on their updated playtime
+            // Process rewards for the player based on their updated play time
             main.getRewardsHandler().processPlayer(player);
             
             // Save the updated user data

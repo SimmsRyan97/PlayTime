@@ -5,7 +5,6 @@ rewards:
 
 playtime:
   track-afk: false  # If true, playtime is tracked even when the player is AFK
-  playtime-format: "%d months %d days, %d hours, %d minutes, %d seconds"  # Custom format for how playtime is displayed
   auto-save-interval: 300  # How often (in seconds) playtime data is auto-saved to the database
 
 commands:
