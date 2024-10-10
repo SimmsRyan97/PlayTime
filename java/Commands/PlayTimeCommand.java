@@ -31,13 +31,13 @@ public class PlayTimeCommand implements CommandExecutor {
         if (sender instanceof Player) {
             player = (Player) sender;
         } else {
-        	sender.sendMessage(ChatColor.RED + main.getTranslator().getConsoleTranslation("error.player_only"));
-        	return true;
+            sender.sendMessage(ChatColor.RED + main.getTranslator().getConsoleTranslation("error.player_only"));
+            return true;
         }
 
         // Check if the command is enabled
         if (!main.getConfig().getBoolean("commands.pt.enabled", true)) {
-        	sender.sendMessage(ChatColor.RED + main.getTranslator().getTranslation("error.command_disabled", player));
+            sender.sendMessage(ChatColor.RED + main.getTranslator().getTranslation("error.command_disabled", player));
             return true;
         }
 
@@ -48,9 +48,8 @@ public class PlayTimeCommand implements CommandExecutor {
 
         // Handle self-query or other player queries
         if (args.length == 0) {
-        	
             targetUUID = player.getUniqueId();
-            playerName = main.getTranslator().getTranslation("playtime.self", player); // Use translation for "You"
+            playerName = "You";  // Set to "You" explicitly
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
         } else {
             // Handle other player queries
@@ -101,14 +100,18 @@ public class PlayTimeCommand implements CommandExecutor {
 
     private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String greenDate, CommandSender sender) {
         String translationKey = playerName.equals("You") ? "playtime.self" : "playtime.other";
-        return String.format(main.getTranslator().getTranslation(translationKey, player),
+        
+        // Prepare the message with correct arguments for String.format
+        String messageTemplate = main.getTranslator().getTranslation(translationKey, player);
+        
+        return String.format(messageTemplate,
                 playerName,
                 timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
                 timeComponents.get("greenDays"), timeComponents.get("daysString"),
                 timeComponents.get("greenHours"), timeComponents.get("hoursString"),
                 timeComponents.get("greenMinutes"), timeComponents.get("minutesString"),
                 timeComponents.get("greenSeconds"), timeComponents.get("secondsString"),
-                greenDate
+                greenDate // Join date
         );
     }
 }
