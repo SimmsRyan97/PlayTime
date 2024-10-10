@@ -1,4 +1,4 @@
-package com.whiteiverson.minecraft.playtime_plugin;
+package com.whiteiverson.minecraft.playtime_plugin.Rewards;
 
 import java.util.Collections;
 import java.util.List;

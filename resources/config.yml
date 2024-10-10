@@ -1,3 +1,5 @@
+lang: "en" # Set to your desired language - see list in lang folder
+
 rewards:
   enabled: true # Master toggle to enable/disable the rewards system
   broadcast: true # Whether to broadcast messages to the server when rewards are given

@@ -56,7 +56,6 @@ public class PlayTimeHandler {
             
             // Check if user data was successfully loaded
             if (userHandler.getUserData(uuid, "playtime") == null) {
-                main.getLogger().severe("User data for " + uuid + " could not be loaded. Skipping player.");
                 continue; // Skip processing for this player
             }
 
@@ -93,7 +92,6 @@ public class PlayTimeHandler {
 
         // Return 0 if no world is loaded
         if (world == null) {
-            Bukkit.getLogger().warning("No worlds found, unable to retrieve playtime for UUID: " + uuid);
             return 0;
         }
 
@@ -119,10 +117,10 @@ public class PlayTimeHandler {
                     }
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().severe("Failed to read player stats file for UUID " + uuid + ": " + e.getMessage());
+                Bukkit.getLogger().severe(e.getMessage());
             }
         } else {
-            Bukkit.getLogger().warning("Stats file not found for UUID: " + uuid);
+            Bukkit.getLogger().warning(("user.not_found") + uuid);
         }
 
         return 0; // Return 0 if the file does not exist or there was an issue

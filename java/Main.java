@@ -8,13 +8,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeCommand;
+import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeTopCommand;
+import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
 
 public class Main extends JavaPlugin {
     private static Main instance;
     private PlayTimeHandler playTimeHandler;
     private RewardsHandler rewardsHandler;
     private UserHandler userHandler;
+    private Translator translator;
 
     // To handle reward cooldowns
     private Map<UUID, Long> rewardCooldowns = new HashMap<>();
@@ -27,10 +33,14 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        getLogger().info("PlayTime plugin is loading...");
+        // Instantiate the Translator
+        translator = new Translator();
 
         // Load config.yml
         saveDefaultConfig();
+
+        // Output loading message in console using console-specific translation method
+        getLogger().info(translator.getConsoleTranslation("plugin.loading")); // For console
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
@@ -47,7 +57,8 @@ public class Main extends JavaPlugin {
         // Enable commands based on config
         registerCommands();
 
-        getLogger().info("PlayTime plugin loaded successfully!");
+        // Output success message in console using console-specific translation method
+        getLogger().info(translator.getConsoleTranslation("plugin.load_success")); // For console
     }
 
     private void registerCommands() {
@@ -81,14 +92,21 @@ public class Main extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-    	getLogger().info("Command received: " + cmd.getName());
-    	
         if ("ptreload".equalsIgnoreCase(cmd.getName())) {
             if (sender.hasPermission("playtime.reload")) {
                 reloadPlugin();
-                sender.sendMessage(ChatColor.GREEN + "Plugin configuration reloaded successfully.");
+                
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    sender.sendMessage(ChatColor.GREEN + translator.getTranslation("plugin.reload", player)); // Player translation
+                } else {
+                    sender.sendMessage(ChatColor.GREEN + translator.getConsoleTranslation("plugin.reload")); // Console translation
+                }
             } else {
-                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    sender.sendMessage(ChatColor.RED + translator.getTranslation("error.no_permission", player)); // Player translation
+                }
             }
             return true;
         }
@@ -99,9 +117,13 @@ public class Main extends JavaPlugin {
         reloadConfig();
         manageRewards(); // Reload the reward system as well
     }
-    
+
     // Helper method to calculate time components and handle plural/singular formatting
-    public static Map<String, String> calculatePlaytime(long totalSeconds) {
+    public static Map<String, String> calculatePlaytime(long totalSeconds, Main main, CommandSender sender, Translator translator) {
+        // Ensure sender is a player
+    	
+        Player player = (Player) sender;
+
         // Time constants
         long secondsInAMinute = 60;
         long secondsInAnHour = 3600;
@@ -125,28 +147,31 @@ public class Main extends JavaPlugin {
         String greenMinutes = ChatColor.GREEN + String.valueOf(minutes) + ChatColor.RESET;
         String greenSeconds = ChatColor.GREEN + String.valueOf(seconds) + ChatColor.RESET;
 
-        // Plural/singular formatting
+        // Plural/singular formatting using translations
         Map<String, String> timeComponents = new HashMap<>();
         timeComponents.put("greenMonths", greenMonths);
         timeComponents.put("greenDays", greenDays);
         timeComponents.put("greenHours", greenHours);
         timeComponents.put("greenMinutes", greenMinutes);
         timeComponents.put("greenSeconds", greenSeconds);
-        timeComponents.put("monthsString", months == 1 ? "month" : "months");
-        timeComponents.put("daysString", days == 1 ? "day" : "days");
-        timeComponents.put("hoursString", hours == 1 ? "hour" : "hours");
-        timeComponents.put("minutesString", minutes == 1 ? "minute" : "minutes");
-        timeComponents.put("secondsString", seconds == 1 ? "second" : "seconds");
+
+        // Plural/singular translation
+        timeComponents.put("monthsString", months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player));
+        timeComponents.put("daysString", days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player));
+        timeComponents.put("hoursString", hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player));
+        timeComponents.put("minutesString", minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player));
+        timeComponents.put("secondsString", seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player));
 
         return timeComponents;
     }
-    
-    public PlayTimeHandler getPlayTimeHandler() {
-        return playTimeHandler;
-    }
+
 
     public RewardsHandler getRewardsHandler() {
         return rewardsHandler;
+    }
+
+    public PlayTimeHandler getPlayTimeHandler() {
+        return playTimeHandler;
     }
 
     public UserHandler getUserHandler() {
@@ -155,5 +180,9 @@ public class Main extends JavaPlugin {
 
     public Map<UUID, Long> getRewardCooldowns() {
         return rewardCooldowns;
+    }
+
+    public Translator getTranslator() {
+        return translator;
     }
 }

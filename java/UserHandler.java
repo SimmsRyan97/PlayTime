@@ -59,18 +59,17 @@ public class UserHandler implements Listener {
             userConfig = YamlConfiguration.loadConfiguration(userFile);
         } else {
             try {
-                main.getLogger().info("Creating new data file for user: " + uuid);
                 userFile.createNewFile();
                 userConfig = YamlConfiguration.loadConfiguration(userFile);
             } catch (IOException e) {
-                main.getLogger().severe("Failed to create user data file for " + uuid + ": " + e.getMessage());
+                main.getLogger().severe(e.getMessage());
                 return;
             }
         }
 
         if (!userConfig.contains("playtime")) {
-            userConfig.set("playtime", 0.0);  // Initialise playtime
-            main.getLogger().info("Setting initial playtime for user: " + uuid);
+            userConfig.set("playtime", 0.0);  // Initialise play time
+            main.getLogger().info(("user.initial") + uuid);
         }
 
         loadRewardsForUser(userConfig);
@@ -117,10 +116,10 @@ public class UserHandler implements Listener {
     }
 
     /**
-     * Retrieves the user's playtime.
+     * Retrieves the user's play time.
      *
      * @param uuid The UUID of the user.
-     * @return The playtime as a double.
+     * @return The play time as a double.
      */
     public double getPlaytime(UUID uuid) {
         return getUserConfigValue(uuid, "playtime", 0.0);
@@ -154,12 +153,9 @@ public class UserHandler implements Listener {
         if (userConfig == null) {
             loadUserData(uuid);  // Load the user's data if it wasn't loaded
             userConfig = userConfigs.get(uuid);
-        }
-        if (userConfig != null) {
+        } else {
             userConfig.set(key, value);
             saveUserData(uuid);
-        } else {
-            main.getLogger().severe("Failed to set user data. Configuration for user " + uuid + " is not initialized.");
         }
     }
 
@@ -180,7 +176,7 @@ public class UserHandler implements Listener {
         try {
             userConfig.save(userFile);
         } catch (IOException e) {
-            main.getLogger().severe("Failed to save user data for " + uuid + ": " + e.getMessage());
+            main.getLogger().severe(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -231,10 +227,5 @@ public class UserHandler implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         loadUserData(uuid);  // Ensure data is loaded on join
-
-        // Log to verify userConfig is correctly loaded
-        if (userConfigs.get(uuid) == null) {
-            main.getLogger().severe("User config for UUID " + uuid + " is still null after loading.");
-        }
     }
 }

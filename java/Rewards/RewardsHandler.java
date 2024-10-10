@@ -1,7 +1,10 @@
-package com.whiteiverson.minecraft.playtime_plugin;
+package com.whiteiverson.minecraft.playtime_plugin.Rewards;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import com.whiteiverson.minecraft.playtime_plugin.Main;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -55,11 +58,11 @@ public class RewardsHandler {
                 if (name != null && !commands.isEmpty()) {
                     rewards.add(new Rewards(name, time, commands));
                 } else {
-                    Bukkit.getLogger().warning("Invalid reward configuration for key: " + key);
+                    Bukkit.getLogger().warning(main.getTranslator().getConsoleTranslation("rewards.invalid_key") + key);
                 }
             }
         } else {
-            Bukkit.getLogger().warning("No rewards section found in the rewards.yml config!");
+            Bukkit.getLogger().warning(main.getTranslator().getConsoleTranslation("rewards.no_rewards"));
         }
     }
 
@@ -88,7 +91,7 @@ public class RewardsHandler {
 
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast")) {
-                    Bukkit.broadcastMessage(player.getName() + " has earned the reward: " + reward.getName());
+                    Bukkit.broadcastMessage(player.getName() + main.getTranslator().getTranslation("rewards.earned", player) + reward.getName());
                 }
 
                 // Update last reward processing time
