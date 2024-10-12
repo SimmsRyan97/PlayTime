@@ -1,7 +1,7 @@
-#Deutsche Übersetzung - Danken an schildkroet05 un sylfori (Chaos)
+#Deutsche Übersetzung - Danken an schildkroet05 und sylfori (Chaos)
 playtime:
   self: "Deine Spielzeit beträgt %s %s, %s %s, %s %s, %s %s und %s %s. Du bist am %s beigetreten."
-  other: "%s's Spielzeit beträgt %s %s, %s %s, %s %s, %s %s und %s %s. Sie ist am %s beigetreten."
+  other: "%s's Spielzeit beträgt %s %s, %s %s, %s %s, %s %s und %s %s. Sie sind am %s beigetreten."
   time:
     months: 
       singular: "Monat"

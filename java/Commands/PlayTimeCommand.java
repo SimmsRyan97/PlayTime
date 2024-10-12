@@ -27,7 +27,7 @@ public class PlayTimeCommand implements CommandExecutor {
         if (!(label.equalsIgnoreCase("playtime") || label.equalsIgnoreCase("pt"))) {
             return false; // Not the correct command
         }
-        
+
         if (sender instanceof Player) {
             player = (Player) sender;
         } else {
@@ -41,23 +41,23 @@ public class PlayTimeCommand implements CommandExecutor {
             return true;
         }
 
-        // Initialize UUID and playerName variables
+        // Initialise UUID and playerName variables
         UUID targetUUID;
         String playerName;
         String joinDate;
 
         // Handle self-query or other player queries
         if (args.length == 0) {
+            // No username provided, querying self
             targetUUID = player.getUniqueId();
-            playerName = "You";  // Set to "You" explicitly
+            playerName = "You";  // Set to "You" explicitly for self-query
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
         } else {
             // Handle other player queries
             playerName = args[0];
 
             // Check permission to view other players' play time
-            String permission = main.getConfig().getString("commands.pt.permission", "playtime.check");
-            if (!sender.hasPermission(permission)) {
+            if (!sender.hasPermission("playtime.check")) {
                 sender.sendMessage(ChatColor.RED + main.getTranslator().getTranslation("error.no_permission", player));
                 return true;
             }
@@ -80,6 +80,11 @@ public class PlayTimeCommand implements CommandExecutor {
             }
 
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
+
+            // Check if the username is the same as the sender's username
+            if (targetUUID.equals(player.getUniqueId())) {
+                playerName = "You";  // Set to "You" if the player is querying their own play time
+            }
         }
 
         // Fetch play time in seconds and convert it into time components
@@ -92,7 +97,7 @@ public class PlayTimeCommand implements CommandExecutor {
 
         // Prepare the message based on self or other player query
         String message = formatPlaytimeMessage(playerName, timeComponents, greenDate, sender);
-        
+
         // Send the message to the sender
         sender.sendMessage(message);
         return true;

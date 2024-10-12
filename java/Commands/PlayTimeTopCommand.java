@@ -57,8 +57,7 @@ public class PlayTimeTopCommand implements CommandExecutor {
         if (!enabled) {
         	sender.sendMessage(ChatColor.RED + main.getTranslator().getTranslation("error.command_disabled", player));
         } else {
-            String permission = main.getConfig().getString("commands.pttop.permission", "playtime.top");
-            if (!sender.hasPermission(permission)) {
+            if (!sender.hasPermission("playtime.top")) {
             	sender.sendMessage(ChatColor.RED + main.getTranslator().getTranslation("error.no_permission", player));
                 return false;
             }

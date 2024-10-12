@@ -44,11 +44,12 @@ public class Main extends JavaPlugin {
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
-        rewardsHandler = new RewardsHandler();
-
+        rewardsHandler = new RewardsHandler(this); // Pass instance to RewardsHandler
+        
         // Initialise handlers
-        playTimeHandler.enable();
         userHandler.enable();
+        playTimeHandler.enable();
+        
         manageRewards();
 
         // Register event listeners
@@ -75,38 +76,29 @@ public class Main extends JavaPlugin {
 
     private void manageRewards() {
         if (getConfig().getBoolean("rewards.enabled", true)) {
-            rewardsHandler.enable();
-        } else {
-            rewardsHandler.disable();
+            rewardsHandler.enable(); // Initialise rewards if enabled
         }
     }
 
     @Override
     public void onDisable() {
         // Ensure to save any necessary data here, if applicable
-        playTimeHandler.disable();
-        rewardsHandler.disable();
-        userHandler.disable();
         instance = null;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if ("ptreload".equalsIgnoreCase(cmd.getName())) {
-            if (sender.hasPermission("playtime.reload")) {
-                reloadPlugin();
-                
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (sender.hasPermission("playtime.reload")) {
+                    reloadPlugin();
                     sender.sendMessage(ChatColor.GREEN + translator.getTranslation("plugin.reload", player)); // Player translation
                 } else {
-                    sender.sendMessage(ChatColor.GREEN + translator.getConsoleTranslation("plugin.reload")); // Console translation
-                }
-            } else {
-                if (sender instanceof Player) {
-                    Player player = (Player) sender;
                     sender.sendMessage(ChatColor.RED + translator.getTranslation("error.no_permission", player)); // Player translation
                 }
+            } else {
+                sender.sendMessage(ChatColor.GREEN + translator.getConsoleTranslation("plugin.reload")); // Console translation
             }
             return true;
         }
@@ -115,14 +107,19 @@ public class Main extends JavaPlugin {
 
     private void reloadPlugin() {
         reloadConfig();
-        manageRewards(); // Reload the reward system as well
+        userHandler.loadConfigValues();
+        playTimeHandler.loadConfigValues();
+        manageRewards();
     }
 
     // Helper method to calculate time components and handle plural/singular formatting
     public static Map<String, String> calculatePlaytime(long totalSeconds, Main main, CommandSender sender, Translator translator) {
         // Ensure sender is a player
-    	
-        Player player = (Player) sender;
+        Player player = null;
+
+        if (sender instanceof Player) {
+            player = (Player) sender;
+        }
 
         // Time constants
         long secondsInAMinute = 60;
@@ -164,7 +161,6 @@ public class Main extends JavaPlugin {
 
         return timeComponents;
     }
-
 
     public RewardsHandler getRewardsHandler() {
         return rewardsHandler;

@@ -22,21 +22,17 @@ public class PlayTimeHandler {
     public PlayTimeHandler(Main main, UserHandler userHandler) {
         this.main = main; // Initialise the main instance
         this.userHandler = userHandler; // Inject the UserHandler
-        loadConfigValues();
     }
 
     public void enable() {
+    	loadConfigValues();
         startTasks();
     }
 
-    public void disable() {
-        // Disable-related cleanups if needed
-    }
-
-    private void loadConfigValues() {
+    public void loadConfigValues() {
         // Load values from config.yml
-        this.trackAfk = main.getConfig().getBoolean("playtime.track-afk");
-        this.autoSaveInterval = main.getConfig().getInt("playtime.auto-save-interval");
+        trackAfk = main.getConfig().getBoolean("track-afk.enabled", false);
+        autoSaveInterval = main.getConfig().getInt("playtime.auto-save-interval", 300);
     }
 
     private void startTasks() {
@@ -59,11 +55,9 @@ public class PlayTimeHandler {
                 continue; // Skip processing for this player
             }
 
-            // Update the last active time for AFK tracking
-            userHandler.setLastActive(uuid, System.currentTimeMillis());
-
             // Get play time from UserHandler
             double playtime = userHandler.getUserConfigValue(uuid, "playtime", 0);
+            double afkTime = userHandler.getUserConfigValue(uuid, "afk-time", 0); // Retrieve afk-time
 
             // If the user has no recorded play time, retrieve it from world files
             if (playtime == 0) {
@@ -71,8 +65,13 @@ public class PlayTimeHandler {
                 userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved play time
             }
 
-            // Increment play time only if AFK tracking is disabled or the player is not AFK
-            if (!trackAfk || !userHandler.isAfk(uuid)) {
+            // Increment play time and afk-time based on AFK status
+            if (trackAfk && userHandler.isAfk(uuid)) {
+                // Player is AFK, increment the afk-time
+                afkTime += 1; // Increment AFK time by 1 second
+                userHandler.setUserData(uuid, "afk-time", afkTime); // Save afk-time in UserHandler
+            } else {
+                // Player is active, increment the play time
                 playtime += 1; // Increment play time by 1 second
                 userHandler.setUserData(uuid, "playtime", playtime); // Update play time in UserHandler
             }

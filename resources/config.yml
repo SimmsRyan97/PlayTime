@@ -6,8 +6,11 @@ rewards:
   reward-cooldown: 60 # Minimum time (in seconds) between processing rewards for the same player
 
 playtime:
-  track-afk: false  # If true, playtime is tracked even when the player is AFK
   auto-save-interval: 300  # How often (in seconds) playtime data is auto-saved to the database
+  
+track-afk:
+  enabled: false  # If true, afk-time is recorded causing play time to be paused when user is AFK
+  afk-detection: 300000 # Time (in miliseconds) until player becomes AFK - default is 5 minutes
 
 commands:
   pt:
@@ -18,7 +21,7 @@ commands:
     permission: "playtime.top"  # Required permission to view the top playtimes
   ptreload:
     enabled: true
-    permission: "playtime.reload"
+    permission: "playtime.reload" # Required permission to reload the config
 
 logging:
   debug: false  # Enable debug logging

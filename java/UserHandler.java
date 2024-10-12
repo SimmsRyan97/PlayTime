@@ -6,7 +6,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +28,7 @@ public class UserHandler implements Listener {
     private final File userDataFolder;
     private final File rewardsFile;
     private final HashMap<UUID, Long> lastActive = new HashMap<>();
-    private final long afkThreshold = 300000; // 5 minutes in milliseconds
+    private long afkThreshold;
 
     /**
      * Initialises the UserHandler and sets up the user data directory.
@@ -39,11 +43,12 @@ public class UserHandler implements Listener {
     }
     
     public void enable() {
-        //TODO Add enabling of tasks if needed
+    	loadConfigValues();
     }
     
-    public void disable() {
-        //TODO Add disabling of tasks if needed
+    public void loadConfigValues() {
+    	FileConfiguration config = main.getConfig();
+    	afkThreshold = config.getLong("track-afk.afk-detection", 300000); // Default to 5 minutes if not set
     }
 
     /**
@@ -213,19 +218,49 @@ public class UserHandler implements Listener {
      *
      * @param uuid The UUID of the player.
      * @return True if the player is AFK, false otherwise.
-     */
+     */    
     public boolean isAfk(UUID uuid) {
-        return (System.currentTimeMillis() - lastActive.getOrDefault(uuid, 0L)) > afkThreshold;
+        long currentTime = System.currentTimeMillis();
+        long lastActiveTime = lastActive.getOrDefault(uuid, 0L);
+        
+        boolean afkStatus = (currentTime - lastActiveTime) > afkThreshold;
+        
+        return afkStatus;
     }
 
     /**
-     * Handles player join events to load user data.
+     * Handles player join events, moves, interacts or chats
      *
-     * @param event The player join event.
+     * @param event.
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         loadUserData(uuid);  // Ensure data is loaded on join
+        setLastActive(uuid, System.currentTimeMillis());
+    }
+    
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        setLastActive(uuid, System.currentTimeMillis());
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        setLastActive(uuid, System.currentTimeMillis());
+    }
+
+    @EventHandler
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        setLastActive(uuid, System.currentTimeMillis());
+    }
+    
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        lastActive.remove(uuid);
     }
 }

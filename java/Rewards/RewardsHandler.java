@@ -17,16 +17,14 @@ public class RewardsHandler {
     private FileConfiguration rewardsConfig;
     private static final int MILLISECONDS_IN_SECOND = 1000;
 
-    /**
-     * Enables the reward system by loading the rewards from configuration.
-     */
-    public void enable() {
-        main = Main.getInstance();
-        setupRewards();
+    // Constructor to accept Main instance
+    public RewardsHandler(Main main) {
+        this.main = main; // Initialise main through the constructor
+        this.rewards = new HashSet<>(); // Initialise rewards Set
     }
     
-    public void disable() {
-    	//TODO Add disabling of tasks if needed
+    public void enable() {
+    	setupRewards(); // Setup rewards in the constructor
     }
 
     /**
@@ -75,11 +73,11 @@ public class RewardsHandler {
         UUID uuid = player.getUniqueId();
         long currentTime = System.currentTimeMillis();
 
-        // Check cooldown to avoid frequent processing
+        // Check cool down to avoid frequent processing
         long lastProcessedTime = main.getRewardCooldowns().getOrDefault(uuid, 0L);
         int cooldown = main.getConfig().getInt("rewards.reward-cooldown", 0) * MILLISECONDS_IN_SECOND;
-        if ((currentTime - lastProcessedTime) < cooldown) {
-            return; // Skip processing if still within cooldown period
+        if ((currentTime - lastProcessedTime) < cooldown || cooldown <= 0) {
+            return; // Skip processing if still within cool down period
         }
 
         // Iterate over each reward
@@ -92,6 +90,10 @@ public class RewardsHandler {
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast")) {
                     Bukkit.broadcastMessage(player.getName() + main.getTranslator().getTranslation("rewards.earned", player) + reward.getName());
+                }
+
+                if (main.getConfig().getBoolean("logging.reward-claims")) {
+                    Bukkit.getLogger().info(player.getName() + main.getTranslator().getConsoleTranslation("rewards.earned") + reward.getName());
                 }
 
                 // Update last reward processing time
@@ -121,8 +123,10 @@ public class RewardsHandler {
      * @return True if the reward has been claimed, false otherwise.
      */
     private boolean hasRewardBeenClaimed(UUID uuid, Rewards reward) {
-        return main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName()) instanceof Boolean
-                && (Boolean) main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName());
+        return Optional.ofNullable(main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName()))
+                .filter(data -> data instanceof Boolean)
+                .map(data -> (Boolean) data)
+                .orElse(false);
     }
 
     /**
