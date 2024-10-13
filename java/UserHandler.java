@@ -67,7 +67,9 @@ public class UserHandler implements Listener {
                 userFile.createNewFile();
                 userConfig = YamlConfiguration.loadConfiguration(userFile);
             } catch (IOException e) {
-                main.getLogger().severe(e.getMessage());
+            	if (main.getConfig().getBoolean("logging.debug", false)) {
+            		main.getLogger().severe(e.getMessage());
+            	}
                 return;
             }
         }
@@ -181,8 +183,10 @@ public class UserHandler implements Listener {
         try {
             userConfig.save(userFile);
         } catch (IOException e) {
-            main.getLogger().severe(e.getMessage());
-            e.printStackTrace();
+        	if (main.getConfig().getBoolean("logging.debug", false)) {
+	            main.getLogger().severe(e.getMessage());
+	            e.printStackTrace();
+        	}
         }
     }
 

@@ -106,9 +106,9 @@ public class Main extends JavaPlugin {
     }
 
     private void reloadPlugin() {
-        reloadConfig();
-        userHandler.loadConfigValues();
-        playTimeHandler.loadConfigValues();
+        reloadConfig(); // Reloads config.yml file
+        userHandler.loadConfigValues(); // Reloads values in userHandler
+        playTimeHandler.loadConfigValues(); // Reloads values in playTimeHandler
         manageRewards();
     }
 

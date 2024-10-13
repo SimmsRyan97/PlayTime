@@ -51,10 +51,11 @@ public class Translator {
                                         try (InputStream inputStream = jarFile.getInputStream(entry)) {
                                             if (inputStream != null) {
                                                 Files.copy(inputStream, langFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                                                main.getLogger().info("Copied language file: " + fileName);
                                             }
                                         } catch (IOException e) {
-                                            main.getLogger().log(Level.SEVERE, "Failed to copy language file: " + fileName, e);
+                                        	if (main.getConfig().getBoolean("logging.debug", false)) {
+                                        		main.getLogger().log(Level.SEVERE, "Failed to copy language file: " + fileName, e);
+                                        	}
                                         }
                                     }
 
@@ -64,11 +65,11 @@ public class Translator {
                                 });
                     }
                 }
-            } else {
-                main.getLogger().warning("Language folder not found in JAR.");
             }
         } catch (Exception e) {
-            main.getLogger().log(Level.SEVERE, "Failed to load language files dynamically", e);
+        	if (main.getConfig().getBoolean("logging.debug", false)) {
+        		main.getLogger().log(Level.SEVERE, "Failed to load language files dynamically", e);
+        	}
         }
     }
 

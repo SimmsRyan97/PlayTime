@@ -116,7 +116,9 @@ public class PlayTimeHandler {
                     }
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().severe(e.getMessage());
+            	if (main.getConfig().getBoolean("logging.debug", false)) {
+            		Bukkit.getLogger().severe(e.getMessage());
+            	}
             }
         } else {
             Bukkit.getLogger().warning(("user.not_found") + uuid);
