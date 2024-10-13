@@ -23,3 +23,11 @@ PlayTime is designed for Minecraft servers that allows users to track their play
 
 ## Bug Reporting and Suggestions
 Your feedback is crucial to the ongoing development of PlayTime. If you have any suggestions for new features, encounter bugs, or have general inquiries, please don’t hesitate to reach out!
+
+## Contact Me
+You can find me on:
+- My website: https://www.ryan-simms.com/
+- Discord: https://discordapp.com/users/208345026340585473/
+
+## Special Thanks
+A big shoutout to player's from [Koinotita Gaming](https://discord.gg/hEHeTbc), especially Siphayeur, schildkroet05, sylfori (Chaos) & L.E.S.F!
