@@ -32,6 +32,6 @@ You can find me on:
 ## Special Thanks
 A big shoutout to player's from [Koinotita Gaming](https://discord.gg/hEHeTbc), especially Siphayeur, schildkroet05, sylfori (Chaos) & L.E.S.F!
 
-##Future Updates
+## Future Updates
 - More user customisation (e.g. allow users to change colours used to display messages)
 - Webhooks for Discord chat messages (DiscordSRV, Essentials)
