@@ -109,8 +109,6 @@ public class PlayTimeCommand implements CommandExecutor {
         // Prepare the message with correct arguments for String.format
         String messageTemplate = main.getTranslator().getTranslation(translationKey, player);
         
-        main.getLogger().info("Message Template: " + messageTemplate);
-        
         return String.format(messageTemplate,
                 timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
                 timeComponents.get("greenDays"), timeComponents.get("daysString"),
