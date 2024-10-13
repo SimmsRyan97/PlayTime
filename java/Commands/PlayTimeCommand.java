@@ -96,21 +96,22 @@ public class PlayTimeCommand implements CommandExecutor {
         String greenDate = ChatColor.GREEN + joinDate + ChatColor.RESET;
 
         // Prepare the message based on self or other player query
-        String message = formatPlaytimeMessage(playerName, timeComponents, greenDate, sender);
+        String message = formatPlaytimeMessage(playerName, timeComponents, greenDate);
 
         // Send the message to the sender
         sender.sendMessage(message);
         return true;
     }
 
-    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String greenDate, CommandSender sender) {
+    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String greenDate) {
         String translationKey = playerName.equals("You") ? "playtime.self" : "playtime.other";
         
         // Prepare the message with correct arguments for String.format
         String messageTemplate = main.getTranslator().getTranslation(translationKey, player);
         
+        main.getLogger().info("Message Template: " + messageTemplate);
+        
         return String.format(messageTemplate,
-                playerName,
                 timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
                 timeComponents.get("greenDays"), timeComponents.get("daysString"),
                 timeComponents.get("greenHours"), timeComponents.get("hoursString"),
