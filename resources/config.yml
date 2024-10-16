@@ -7,6 +7,7 @@ rewards:
 
 playtime:
   auto-save-interval: 300  # How often (in seconds) playtime data is auto-saved to the database
+  page-size: 10 # How many players per page in /pttop
   
 track-afk:
   enabled: false  # If true, afk-time is recorded causing play time to be paused when user is AFK
@@ -15,13 +16,10 @@ track-afk:
 commands:
   pt:
     enabled: true  # Enable/disable the /pt (playtime) command
-    permission: "playtime.check"  # Required permission to use /pt
   pttop:
     enabled: true  # Enable/disable the /pttop command
-    permission: "playtime.top"  # Required permission to view the top playtimes
   ptreload:
     enabled: true # Enable/disable the /ptreload command
-    permission: "playtime.reload" # Required permission to reload the config
 
 logging:
   debug: false  # Enable debug logging

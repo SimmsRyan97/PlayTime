@@ -15,11 +15,12 @@ import java.util.stream.Collectors;
 
 public class PlayTimeTopCommand implements CommandExecutor {
     private final Main main;
-    private static final int PAGE_SIZE = 10;
+    private int PAGE_SIZE;
     Player player = null;
 
     public PlayTimeTopCommand(Main main) {
         this.main = main;
+        PAGE_SIZE = main.getConfig().getInt("page-size", 10);
     }
 
     @Override

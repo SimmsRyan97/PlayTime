@@ -4,6 +4,12 @@ package com.whiteiverson.minecraft.playtime_plugin;
  * TickTask is a Runnable that processes player data at regular intervals.
  */
 public class TickTask implements Runnable {
+	
+	private final Main main;
+	
+	public TickTask() {
+		this.main = Main.getInstance();
+	}
     
     /**
      * Executes the task to process players.
@@ -15,8 +21,10 @@ public class TickTask implements Runnable {
             Main.getInstance().getPlayTimeHandler().processPlayers();
         } catch (Exception e) {
             // Log any exceptions that occur during player processing
-            Main.getInstance().getLogger().severe("An error occurred while processing players: " + e.getMessage());
-            e.printStackTrace();
+        	if (main.getConfig().getBoolean("logging.debug", false)) {
+	            Main.getInstance().getLogger().severe("An error occurred while processing players: " + e.getMessage());
+	            e.printStackTrace();
+        	}
         }
     }
 }
