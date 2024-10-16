@@ -89,7 +89,12 @@ public class RewardsHandler {
 
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast")) {
-                    Bukkit.broadcastMessage(player.getName() + main.getTranslator().getTranslation("rewards.earned", player) + reward.getName());
+                	String playerNameColor, earnedColor, rewardsColor;
+                	playerNameColor = main.getColorUtil().translateColor(main.getConfig().getString("color.user"));
+                	earnedColor = main.getColorUtil().translateColor(main.getConfig().getString("color.earned"));
+                	rewardsColor = main.getColorUtil().translateColor(main.getConfig().getString("color.reward"));
+                	
+                    Bukkit.broadcastMessage(playerNameColor + player.getName() + earnedColor + main.getTranslator().getTranslation("rewards.earned", player) + rewards + rewardsColor + reward.getName());
                 }
 
                 if (main.getConfig().getBoolean("logging.reward-claims")) {

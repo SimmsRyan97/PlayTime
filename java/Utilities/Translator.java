@@ -1,8 +1,10 @@
-package com.whiteiverson.minecraft.playtime_plugin;
+package com.whiteiverson.minecraft.playtime_plugin.Utilities;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
+import com.whiteiverson.minecraft.playtime_plugin.Main;
 
 import java.io.File;
 import java.io.IOException;

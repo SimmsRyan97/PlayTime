@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.UUID;
 
 import com.google.gson.JsonObject;
@@ -83,6 +84,23 @@ public class PlayTimeHandler {
             userHandler.saveUserData(uuid);
         }
     }
+    
+    @SuppressWarnings("deprecation") // The deprecated method is for older versions of Minecraft
+	private JsonObject parseJson(Reader reader) throws IOException {
+        try {
+            // Attempt to use the newer parseReader(Reader) method (available in GSON 2.8.6+)
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (NoSuchMethodError e) {
+            // If the newer method isn't available, fall back to the older parse(String) method
+            StringBuilder jsonContent = new StringBuilder();
+            String line;
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            while ((line = bufferedReader.readLine()) != null) {
+                jsonContent.append(line);
+            }
+            return new JsonParser().parse(jsonContent.toString()).getAsJsonObject();
+        }
+    }
 
     // Get play time from server files as initial value
     private double retrievePlaytimeFromWorldFiles(UUID uuid) {
@@ -101,8 +119,8 @@ public class PlayTimeHandler {
         // Check if the file exists before reading
         if (playerFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(playerFile))) {
-                // Parse the JSON file
-                JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+                // Use the utility method to parse the JSON file
+                JsonObject json = parseJson(reader);
 
                 // Navigate to the play time within "stats.minecraft:custom.minecraft:play_time"
                 if (json.has("stats")) {
@@ -116,9 +134,9 @@ public class PlayTimeHandler {
                     }
                 }
             } catch (IOException e) {
-            	if (main.getConfig().getBoolean("logging.debug", false)) {
-            		Bukkit.getLogger().severe(e.getMessage());
-            	}
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    Bukkit.getLogger().severe(e.getMessage());
+                }
             }
         } else {
             Bukkit.getLogger().warning(("user.not_found") + uuid);

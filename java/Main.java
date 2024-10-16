@@ -4,16 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import net.md_5.bungee.api.ChatColor;
 
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeTopCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.ColorUtil;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
 
 public class Main extends JavaPlugin {
     private static Main instance;
@@ -21,6 +23,7 @@ public class Main extends JavaPlugin {
     private RewardsHandler rewardsHandler;
     private UserHandler userHandler;
     private Translator translator;
+    private ColorUtil colorUtil;
 
     // To handle reward cooldowns
     private Map<UUID, Long> rewardCooldowns = new HashMap<>();
@@ -35,6 +38,9 @@ public class Main extends JavaPlugin {
 
         // Instantiate the Translator
         translator = new Translator();
+        
+        // Initiate the Colors
+        colorUtil = new ColorUtil();
 
         // Load config.yml
         saveDefaultConfig();
@@ -93,12 +99,12 @@ public class Main extends JavaPlugin {
                 Player player = (Player) sender;
                 if (sender.hasPermission("playtime.reload")) {
                     reloadPlugin();
-                    sender.sendMessage(ChatColor.GREEN + translator.getTranslation("plugin.reload", player)); // Player translation
+                    sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.success")) + translator.getTranslation("plugin.reload", player)); // Player translation
                 } else {
-                    sender.sendMessage(ChatColor.RED + translator.getTranslation("error.no_permission", player)); // Player translation
+                    sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.error")) + translator.getTranslation("error.no_permission", player)); // Player translation
                 }
             } else {
-                sender.sendMessage(ChatColor.GREEN + translator.getConsoleTranslation("plugin.reload")); // Console translation
+                sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.success")) + translator.getConsoleTranslation("plugin.reload")); // Console translation
             }
             return true;
         }
@@ -136,13 +142,15 @@ public class Main extends JavaPlugin {
         long remainingSecondsAfterHours = remainingSecondsAfterDays % secondsInAnHour;
         long minutes = remainingSecondsAfterHours / secondsInAMinute;
         long seconds = remainingSecondsAfterHours % secondsInAMinute;
+        
+        String integerColor = main.colorUtil.translateColor(main.getConfig().getString("color.integer"));
 
         // Green strings with colour coding
-        String greenMonths = ChatColor.GREEN + String.valueOf(months) + ChatColor.RESET;
-        String greenDays = ChatColor.GREEN + String.valueOf(days) + ChatColor.RESET;
-        String greenHours = ChatColor.GREEN + String.valueOf(hours) + ChatColor.RESET;
-        String greenMinutes = ChatColor.GREEN + String.valueOf(minutes) + ChatColor.RESET;
-        String greenSeconds = ChatColor.GREEN + String.valueOf(seconds) + ChatColor.RESET;
+        String greenMonths = integerColor + String.valueOf(months) + ChatColor.RESET;
+        String greenDays = integerColor + String.valueOf(days) + ChatColor.RESET;
+        String greenHours = integerColor + String.valueOf(hours) + ChatColor.RESET;
+        String greenMinutes = integerColor + String.valueOf(minutes) + ChatColor.RESET;
+        String greenSeconds = integerColor + String.valueOf(seconds) + ChatColor.RESET;
 
         // Plural/singular formatting using translations
         Map<String, String> timeComponents = new HashMap<>();
@@ -151,13 +159,15 @@ public class Main extends JavaPlugin {
         timeComponents.put("greenHours", greenHours);
         timeComponents.put("greenMinutes", greenMinutes);
         timeComponents.put("greenSeconds", greenSeconds);
+        
+        String intervalColor = main.colorUtil.translateColor(main.getConfig().getString("color.interval"));
 
         // Plural/singular translation
-        timeComponents.put("monthsString", months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player));
-        timeComponents.put("daysString", days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player));
-        timeComponents.put("hoursString", hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player));
-        timeComponents.put("minutesString", minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player));
-        timeComponents.put("secondsString", seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player));
+        timeComponents.put("monthsString", intervalColor + (months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player)));
+        timeComponents.put("daysString", intervalColor + (days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player)));
+        timeComponents.put("hoursString", intervalColor + (hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player)));
+        timeComponents.put("minutesString", intervalColor + (minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player)));
+        timeComponents.put("secondsString", intervalColor + (seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player)));
 
         return timeComponents;
     }
@@ -180,5 +190,9 @@ public class Main extends JavaPlugin {
 
     public Translator getTranslator() {
         return translator;
+    }
+    
+    public ColorUtil getColorUtil() {
+    	return colorUtil;
     }
 }
