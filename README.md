@@ -1,6 +1,7 @@
 # PlayTime
 
-Welcome to **PlayTime**! 🎮 This Minecraft server plugin lets players effortlessly track their playtime, fostering a competitive spirit and community engagement. Whether you're curious about your own playtime or want to check out how others are doing, PlayTime has got you covered!
+Welcome to **PlayTime**!
+This Minecraft server plugin lets players effortlessly track their playtime, fostering a competitive spirit and community engagement. Whether you're curious about your own playtime or want to check out how others are doing, PlayTime has got you covered!
 
 ## Features
 
@@ -20,7 +21,7 @@ Welcome to **PlayTime**! 🎮 This Minecraft server plugin lets players effortle
 - **Color-Coded Chat**: Messages are displayed in chat using Minecraft's built-in color coding, making them easy to read and engaging.
 - **Immediate Feedback**: Players receive clear responses for invalid inputs, ensuring a smooth interaction with the plugin.
 
-### ⚙️ Configurable Settings
+### 🛠️ Configurable Settings
 - **Tailored Experience**: Server owners can adjust settings such as command permissions, pagination size, and display formats right from the configuration file, allowing for a custom fit for any server.
 
 ### 🌍 Translated Messages
