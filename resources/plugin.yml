@@ -1,7 +1,7 @@
 name: PlayTime
-version: 1.5.3
+version: 1.5.4
 main: com.whiteiverson.minecraft.playtime_plugin.Main
-api-version: 1.16.5
+api-version: 1.12.2
 author: WhiteIverson97
 description: A plugin that saves playtime and gives rewards based on total playtime
 website: 'https://www.spigotmc.org/resources/playtime.120015/'
