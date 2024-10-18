@@ -48,6 +48,9 @@ Stay tuned for upcoming features, including:
 - **Webhooks for Discord Chat Messages**: Integration with DiscordSRV and Essentials for even more connectivity!
 - **MySQL Database**: Allow servers to use a MySQL database to store userdata
 
+## Donations
+All donations are greatly appreciated but these are not mandatory whatsoever. Donate [here](https://www.paypal.com/donate/?hosted_button_id=LY743CZEZXEVL)
+
 ---
 
 Enjoy your playtime, and happy gaming! 🎉
