@@ -49,7 +49,7 @@ Stay tuned for upcoming features, including:
 - **MySQL Database**: Allow servers to use a MySQL database to store userdata
 
 ## Donations
-All donations are greatly appreciated but these are not mandatory whatsoever. Donate [here](https://www.paypal.com/donate/?hosted_button_id=LY743CZEZXEVL)
+All donations are greatly appreciated but these are not mandatory whatsoever. Donate [here](https://www.paypal.com/donate/?hosted_button_id=LY743CZEZXEVL).
 
 ---
 
