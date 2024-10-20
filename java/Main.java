@@ -145,20 +145,19 @@ public class Main extends JavaPlugin {
         
         String integerColor = main.colorUtil.translateColor(main.getConfig().getString("color.integer"));
 
-        // Green strings with colour coding
-        String greenMonths = integerColor + String.valueOf(months) + ChatColor.RESET;
-        String greenDays = integerColor + String.valueOf(days) + ChatColor.RESET;
-        String greenHours = integerColor + String.valueOf(hours) + ChatColor.RESET;
-        String greenMinutes = integerColor + String.valueOf(minutes) + ChatColor.RESET;
-        String greenSeconds = integerColor + String.valueOf(seconds) + ChatColor.RESET;
+        String monthsText = integerColor + String.valueOf(months) + ChatColor.RESET;
+        String daysText = integerColor + String.valueOf(days) + ChatColor.RESET;
+        String hoursText = integerColor + String.valueOf(hours) + ChatColor.RESET;
+        String minutesText = integerColor + String.valueOf(minutes) + ChatColor.RESET;
+        String secondsText = integerColor + String.valueOf(seconds) + ChatColor.RESET;
 
         // Plural/singular formatting using translations
         Map<String, String> timeComponents = new HashMap<>();
-        timeComponents.put("greenMonths", greenMonths);
-        timeComponents.put("greenDays", greenDays);
-        timeComponents.put("greenHours", greenHours);
-        timeComponents.put("greenMinutes", greenMinutes);
-        timeComponents.put("greenSeconds", greenSeconds);
+        timeComponents.put("months", monthsText);
+        timeComponents.put("days", daysText);
+        timeComponents.put("hours", hoursText);
+        timeComponents.put("minutes", minutesText);
+        timeComponents.put("seconds", secondsText);
         
         String intervalColor = main.colorUtil.translateColor(main.getConfig().getString("color.interval"));
 

@@ -1,3 +1,4 @@
+# General configuration
 lang: "en" # Set to your desired console language - see list in lang folder
 
 rewards:
@@ -24,8 +25,13 @@ commands:
 logging:
   debug: false  # Enable debug logging
   reward-claims: true  # Log every reward claim to the server console
-  
-color: # Set the visual colors - use Minecraft chat codes (1.16 or below) e.g. &c or hex codes e.g. #FF5555 (1.16+)
+
+
+# -------------------------------------------------------------------------------- #
+
+
+# Color configuration - use Minecraft chat codes (1.16 or below) e.g. &c or hex codes e.g. #FF5555 (1.16+)
+color:
   integer: "#FFFFFF" # Numbers used in total play time
   interval: "#55FF55" # Words following integer e.g. month
   header: "#FFAA00" # Color of the top bar in /pttop
@@ -36,3 +42,6 @@ color: # Set the visual colors - use Minecraft chat codes (1.16 or below) e.g. &
   user: "#FFFFFF" # Any username
   earned: "#FFFFFF" # Reward message e.g. "...has earned"
   reward: "#FFFFFF" # Name of reward
+
+
+# -------------------------------------------------------------------------------- #

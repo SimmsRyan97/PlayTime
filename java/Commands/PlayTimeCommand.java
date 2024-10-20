@@ -87,15 +87,15 @@ public class PlayTimeCommand implements CommandExecutor {
         long totalSeconds = (long) playtime;
 
         Map<String, String> timeComponents = Main.calculatePlaytime(totalSeconds, main, sender, main.getTranslator());
-        String greenDate = main.getColorUtil().translateColor(main.getConfig().getString("color.interval")) + joinDate + ChatColor.RESET;
+        String date = main.getColorUtil().translateColor(main.getConfig().getString("color.interval")) + joinDate + ChatColor.RESET;
 
-        String message = formatPlaytimeMessage(playerName, timeComponents, greenDate, player);
+        String message = formatPlaytimeMessage(playerName, timeComponents, date, player);
 
         sender.sendMessage(message);
         return true;
     }
 
-    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String greenDate, Player player) {
+    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, Player player) {
         String translationKey = playerName.equals("You") ? "playtime.self" : "playtime.other";
         
         // Prepare the message with correct arguments for String.format
@@ -104,12 +104,12 @@ public class PlayTimeCommand implements CommandExecutor {
                 : main.getTranslator().getTranslation(translationKey, null); // Handle console case
 
         return String.format(messageTemplate,
-                timeComponents.get("greenMonths"), timeComponents.get("monthsString"),
-                timeComponents.get("greenDays"), timeComponents.get("daysString"),
-                timeComponents.get("greenHours"), timeComponents.get("hoursString"),
-                timeComponents.get("greenMinutes"), timeComponents.get("minutesString"),
-                timeComponents.get("greenSeconds"), timeComponents.get("secondsString"),
-                greenDate // Join date
+                timeComponents.get("months"), timeComponents.get("monthsString"),
+                timeComponents.get("days"), timeComponents.get("daysString"),
+                timeComponents.get("hours"), timeComponents.get("hoursString"),
+                timeComponents.get("minutes"), timeComponents.get("minutesString"),
+                timeComponents.get("seconds"), timeComponents.get("secondsString"),
+                date // Join date
         );
     }
 }

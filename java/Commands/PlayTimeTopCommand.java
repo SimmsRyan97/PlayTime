@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -105,9 +106,21 @@ public class PlayTimeTopCommand implements CommandExecutor {
     }
 
     private List<UUID> getSortedPlayers() {
+        // Define the path to the data folder
+        File dataFolder = new File(main.getDataFolder(), "data");
+
+        // If the data folder doesn't exist, return an empty list
+        if (!dataFolder.exists() || !dataFolder.isDirectory()) {
+            return Collections.emptyList();
+        }
+
         return Arrays.stream(Bukkit.getOfflinePlayers())
                 .map(OfflinePlayer::getUniqueId)
+                // Filter to include only players with a data file (uuid.yml) in the data folder
+                .filter(uuid -> new File(dataFolder, uuid + ".yml").exists())
+                // Only include players with non-zero play time
                 .filter(uuid -> main.getUserHandler().getPlaytime(uuid) > 0)
+                // Sort the players by their play time in descending order
                 .sorted(Comparator.comparingDouble(main.getUserHandler()::getPlaytime).reversed())
                 .collect(Collectors.toList());
     }
@@ -124,10 +137,10 @@ public class PlayTimeTopCommand implements CommandExecutor {
         String seconds = timeComponents.get("secondsString");
         
         return String.format("%s %s, %s %s, %s %s, %s %s, %s %s",
-                timeComponents.get("greenMonths"), (months),
-                timeComponents.get("greenDays"), (days),
-                timeComponents.get("greenHours"), (hours),
-                timeComponents.get("greenMinutes"), (minutes),
-                timeComponents.get("greenSeconds"), (seconds));
+                timeComponents.get("months"), (months),
+                timeComponents.get("days"), (days),
+                timeComponents.get("hours"), (hours),
+                timeComponents.get("minutes"), (minutes),
+                timeComponents.get("seconds"), (seconds));
     }
 }
