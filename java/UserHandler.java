@@ -109,11 +109,17 @@ public class UserHandler implements Listener {
             userConfig.createSection("rewards");
         }
 
-        // Loop through each reward in the rewards.yml file and initialise to false if not set
+        // Initialise the claimed subsection if it doesn't exist
+        if (!userConfig.contains("rewards.claimed")) {
+            userConfig.createSection("rewards.claimed");
+        }
+
+        // Loop through each reward in the rewards.yml file and initialise to false in rewards.claimed
         if (rewardsConfig.contains("rewards")) {
             rewardsConfig.getConfigurationSection("rewards").getKeys(false).forEach(reward -> {
-                if (!userConfig.contains("rewards." + reward)) {
-                    userConfig.set("rewards." + reward, false);
+                String claimedRewardPath = "rewards.claimed." + reward;
+                if (!userConfig.contains(claimedRewardPath)) {
+                    userConfig.set(claimedRewardPath, false);  // Set unclaimed rewards to false
                 }
             });
         }
