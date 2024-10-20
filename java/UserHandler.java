@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -60,6 +61,7 @@ public class UserHandler implements Listener {
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
         FileConfiguration userConfig;
 
+        // Load existing config or create a new file
         if (userFile.exists()) {
             userConfig = YamlConfiguration.loadConfiguration(userFile);
         } else {
@@ -67,23 +69,36 @@ public class UserHandler implements Listener {
                 userFile.createNewFile();
                 userConfig = YamlConfiguration.loadConfiguration(userFile);
             } catch (IOException e) {
-            	if (main.getConfig().getBoolean("logging.debug", false)) {
-            		main.getLogger().severe(e.getMessage());
-            	}
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe(e.getMessage());
+                }
                 return;
             }
         }
 
+        // Add the username to the config if it's not already set
+        if (!userConfig.contains("username")) {
+            Player player = Bukkit.getPlayer(uuid);  // Try to get online player
+
+            if (player != null) {
+                userConfig.set("username", player.getName());  // Set the online player's name
+            } else {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);  // Handle offline player
+                userConfig.set("username", offlinePlayer.getName());  // Set the offline player's name
+            }
+        }
+
+        // Initialise play time if it's not already set
         if (!userConfig.contains("playtime")) {
             userConfig.set("playtime", 0.0);  // Initialise play time
             if (main.getConfig().getBoolean("logging.debug", false)) {
-            	main.getLogger().info(main.getTranslator().getConsoleTranslation("user.initial") + uuid);
+                main.getLogger().info(main.getTranslator().getConsoleTranslation("user.initial") + uuid);
             }
         }
 
         loadRewardsForUser(userConfig);
-        saveUserData(uuid);
-        userConfigs.put(uuid, userConfig);
+        saveUserData(uuid);  // Save the updated user data
+        userConfigs.put(uuid, userConfig);  // Cache the config
     }
 
     private void loadRewardsForUser(FileConfiguration userConfig) {
