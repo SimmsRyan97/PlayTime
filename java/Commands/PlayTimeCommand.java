@@ -22,6 +22,7 @@ public class PlayTimeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        // Command label check
         if (!(label.equalsIgnoreCase("playtime") || label.equalsIgnoreCase("pt"))) {
             return false;
         }
@@ -30,14 +31,14 @@ public class PlayTimeCommand implements CommandExecutor {
         if (sender instanceof Player) {
             player = (Player) sender;
         } else {
-            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + 
-                main.getTranslator().getConsoleTranslation("error.player_only"));
+            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
+                    main.getTranslator().getConsoleTranslation("error.player_only"));
             return true;
         }
 
         if (!main.getConfig().getBoolean("commands.pt.enabled", true)) {
-            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + 
-                main.getTranslator().getTranslation("error.command_disabled", player));
+            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
+                    main.getTranslator().getTranslation("error.command_disabled", player));
             return true;
         }
 
@@ -45,6 +46,7 @@ public class PlayTimeCommand implements CommandExecutor {
         String playerName;
         String joinDate;
 
+        // Determine if the command is for the self or another player
         if (args.length == 0) {
             targetUUID = player.getUniqueId();
             playerName = "You";
@@ -53,8 +55,8 @@ public class PlayTimeCommand implements CommandExecutor {
             playerName = args[0];
 
             if (!sender.hasPermission("playtime.check")) {
-                sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + 
-                    main.getTranslator().getTranslation("error.no_permission", player));
+                sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
+                        main.getTranslator().getTranslation("error.no_permission", player));
                 return true;
             }
 
@@ -70,8 +72,8 @@ public class PlayTimeCommand implements CommandExecutor {
                     targetUUID = offlinePlayer.getUniqueId();
                     playerName = offlinePlayer.getName();
                 } else {
-                    sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + 
-                        main.getTranslator().getTranslation("error.no_user", player));
+                    sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
+                            main.getTranslator().getTranslation("error.no_user", player));
                     return true;
                 }
             }
@@ -79,7 +81,7 @@ public class PlayTimeCommand implements CommandExecutor {
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
 
             if (targetUUID.equals(player.getUniqueId())) {
-                playerName = "You";
+                playerName = "You"; // Update name to "You" if the target is the player executing the command
             }
         }
 
@@ -101,15 +103,29 @@ public class PlayTimeCommand implements CommandExecutor {
         // Prepare the message with correct arguments for String.format
         String messageTemplate = player != null 
                 ? main.getTranslator().getTranslation(translationKey, player) 
-                : main.getTranslator().getTranslation(translationKey, null); // Handle console case
+                : main.getTranslator().getConsoleTranslation(translationKey); // Handle console case
 
-        return String.format(messageTemplate,
-                timeComponents.get("months"), timeComponents.get("monthsString"),
-                timeComponents.get("days"), timeComponents.get("daysString"),
-                timeComponents.get("hours"), timeComponents.get("hoursString"),
-                timeComponents.get("minutes"), timeComponents.get("minutesString"),
-                timeComponents.get("seconds"), timeComponents.get("secondsString"),
-                date // Join date
-        );
+        if (playerName.equals("You")) {
+            // Format for the current player
+            return String.format(messageTemplate,
+                    timeComponents.get("months"), timeComponents.get("monthsString"),
+                    timeComponents.get("days"), timeComponents.get("daysString"),
+                    timeComponents.get("hours"), timeComponents.get("hoursString"),
+                    timeComponents.get("minutes"), timeComponents.get("minutesString"),
+                    timeComponents.get("seconds"), timeComponents.get("secondsString"),
+                    date // Join date
+            );
+        } else {
+            // Format for other players
+            return String.format(messageTemplate,
+                    playerName, // Add the player name here
+                    timeComponents.get("months"), timeComponents.get("monthsString"),
+                    timeComponents.get("days"), timeComponents.get("daysString"),
+                    timeComponents.get("hours"), timeComponents.get("hoursString"),
+                    timeComponents.get("minutes"), timeComponents.get("minutesString"),
+                    timeComponents.get("seconds"), timeComponents.get("secondsString"),
+                    date // Join date
+            );
+        }
     }
 }

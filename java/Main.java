@@ -162,11 +162,12 @@ public class Main extends JavaPlugin {
         String intervalColor = main.colorUtil.translateColor(main.getConfig().getString("color.interval"));
 
         // Plural/singular translation
-        timeComponents.put("monthsString", intervalColor + (months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player)));
-        timeComponents.put("daysString", intervalColor + (days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player)));
-        timeComponents.put("hoursString", intervalColor + (hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player)));
-        timeComponents.put("minutesString", intervalColor + (minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player)));
-        timeComponents.put("secondsString", intervalColor + (seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player)));
+        timeComponents.put("monthsString", intervalColor + (months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player)) + ChatColor.RESET);
+        timeComponents.put("daysString", intervalColor + (days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player)) + ChatColor.RESET);
+        timeComponents.put("hoursString", intervalColor + (hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player)) + ChatColor.RESET);
+        timeComponents.put("minutesString", intervalColor + (minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player)) + ChatColor.RESET);
+        timeComponents.put("secondsString", intervalColor + (seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player) + ChatColor.RESET)
+        		+ ChatColor.RESET); // Reset before "...joined on (date)"
 
         return timeComponents;
     }

@@ -162,10 +162,9 @@ public class UserHandler implements Listener {
         if (userConfig == null) {
             loadUserData(uuid);  // Load the user's data if it wasn't loaded
             userConfig = userConfigs.get(uuid);
-        } else {
-            userConfig.set(key, value);
-            saveUserData(uuid);
         }
+        userConfig.set(key, value);
+        saveUserData(uuid); // Save the user data regardless of whether they're online
     }
 
     /**
@@ -267,6 +266,7 @@ public class UserHandler implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
+        saveUserData(uuid);
         lastActive.remove(uuid);
     }
 }
