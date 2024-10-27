@@ -56,6 +56,18 @@ public class PlayTimeHandler {
                 continue; // Skip processing for this player
             }
 
+            // Check if the stored username matches the current username
+            String currentUsername = player.getName();
+            Object storedUsernameObj = userHandler.getUserData(uuid, "user"); // Get the stored username
+
+            // Ensure that the object is a String or default to the current username
+            String storedUsername = (storedUsernameObj instanceof String) ? (String) storedUsernameObj : currentUsername;
+
+            if (!storedUsername.equals(currentUsername)) {
+                // Username has changed, update it in the file
+                userHandler.setUserData(uuid, "user", currentUsername);
+            }
+
             // Get play time from UserHandler
             double playtime = userHandler.getUserConfigValue(uuid, "playtime", 0);
             double afkTime = userHandler.getUserConfigValue(uuid, "afk-time", 0); // Retrieve afk-time

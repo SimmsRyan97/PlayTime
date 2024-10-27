@@ -30,6 +30,34 @@ logging:
 # -------------------------------------------------------------------------------- #
 
 
+# Database configuration
+database:
+  enabled: false # Enable/disable the use of a database for data storage
+
+  # Type of database being used (MySQL, SQLite, etc.)
+  type: "MySQL"  # Options: "MySQL", "SQLite"
+    
+  # MySQL Configuration (used only if type is "MySQL")
+  mysql:
+    host: "localhost"         # The host where the database is located
+    port: 3306                # The port number for MySQL (3306 is the default)
+    database_name: "playtime_db"  # The name of the database to use
+    username: "root"          # The database user
+    password: "password"      # The password for the database user
+      
+  # SQLite Configuration (used only if type is "SQLite")
+  sqlite:
+    file: "playtime_data.db"  # The SQLite database file to store data in
+    
+  # Additional optional settings
+  database_options:
+    auto_reconnect: true        # Whether to auto-reconnect on lost connections
+    connection_timeout: 30      # Connection timeout in seconds
+
+
+# -------------------------------------------------------------------------------- #
+
+
 # Color configuration - use Minecraft chat codes (1.16 or below) e.g. &c or hex codes e.g. #FF5555 (1.16+)
 color:
   integer: "#FFFFFF" # Numbers used in total play time
