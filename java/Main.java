@@ -15,6 +15,7 @@ import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeTopCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.ColorUtil;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.PlaceHolder;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
 
 public class Main extends JavaPlugin {
@@ -63,6 +64,11 @@ public class Main extends JavaPlugin {
 
         // Enable commands based on config
         registerCommands();
+        
+        // PlaceholderAPI integration
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        	new PlaceHolder().register();
+        }
 
         // Output success message in console using console-specific translation method
         getLogger().info(translator.getConsoleTranslation("plugin.load_success")); // For console

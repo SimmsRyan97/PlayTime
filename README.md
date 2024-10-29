@@ -47,7 +47,6 @@ A huge thank you to the players from [Koinotita Gaming](https://discord.gg/hEHeT
 Stay tuned for upcoming features, including:
 - **Webhooks for Discord Chat Messages**: Integration with DiscordSRV and Essentials for even more connectivity!
 - **MySQL Database**: Allow servers to use a MySQL database to store userdata
-- **PAPI Support**: Add placeholder support to use in other plugins
 
 ## Donations
 All donations are greatly appreciated but these are not mandatory whatsoever. Donate [here](https://www.paypal.com/donate/?hosted_button_id=LY743CZEZXEVL).
