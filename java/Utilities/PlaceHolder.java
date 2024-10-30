@@ -1,8 +1,9 @@
 package com.whiteiverson.minecraft.playtime_plugin.Utilities;
 
 import java.util.Map;
+import java.util.UUID;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 
@@ -17,7 +18,7 @@ public class PlaceHolder extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "playtimeplugin"; // The identifier used in PlaceholderAPI
+        return "playtime"; // The identifier used in PlaceholderAPI
     }
 
     @Override
@@ -35,21 +36,19 @@ public class PlaceHolder extends PlaceholderExpansion {
         return true; // This ensures the placeholder stays registered
     }
 
-    @Override
-    public String onPlaceholderRequest(Player player, String identifier) {
-        // Check if player is null (could happen if placeholder is used in console)
-        if (player == null) {
+    public String onPlaceholderRequest(OfflinePlayer offlinePlayer, String identifier) {
+        if (offlinePlayer == null || offlinePlayer.getUniqueId() == null) {
             return "";
         }
         
-        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(player.getUniqueId());
-        String joinDate = main.getUserHandler().getUserJoinDate(player.getUniqueId());
-        Map<String, String> timeComponents = Main.calculatePlaytime(playtimeSeconds, main, player, main.getTranslator());
+        UUID playerUUID = offlinePlayer.getUniqueId();
+        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(playerUUID);
+        String joinDate = main.getUserHandler().getUserJoinDate(playerUUID);
 
-        // Add specific placeholders
+        Map<String, String> timeComponents = Main.calculatePlaytime(playtimeSeconds, main, offlinePlayer, main.getTranslator());
+
         switch (identifier) {
-            case "playtime":
-                // Concatenate formatted playtime components
+            case "total_playtime":
                 return String.format("%s %s %s %s %s",
                     timeComponents.get("months") + " " + timeComponents.get("monthsString"),
                     timeComponents.get("days") + " " + timeComponents.get("daysString"),
@@ -63,19 +62,18 @@ public class PlaceHolder extends PlaceholderExpansion {
             case "playtime_in_days":
                 return timeComponents.get("days") + " " + timeComponents.get("daysString");
             case "playtime_in_hours":
-                long hours = playtimeSeconds / 3600; // Total hours
-                return String.valueOf(hours) + " " + (hours == 1 ? "hour" : "hours");
+                long hours = playtimeSeconds / 3600;
+                return hours + " " + (hours == 1 ? "hour" : "hours");
             case "playtime_in_minutes":
-                long minutes = playtimeSeconds / 60; // Total minutes
-                return String.valueOf(minutes) + " " + (minutes == 1 ? "minute" : "minutes");
+                long minutes = playtimeSeconds / 60;
+                return minutes + " " + (minutes == 1 ? "minute" : "minutes");
             case "playtime_in_seconds":
-                return String.valueOf(playtimeSeconds) + " " + (playtimeSeconds == 1 ? "second" : "seconds");
+                return playtimeSeconds + " " + (playtimeSeconds == 1 ? "second" : "seconds");
             case "playtime_join_date":
                 return joinDate;
 
-            // Add more placeholders as needed
             default:
-                return null; // Placeholder wasn't found
+                return null;
         }
     }
 }
