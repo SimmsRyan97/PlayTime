@@ -124,10 +124,10 @@ public class Main extends JavaPlugin {
         manageRewards();
     }
 
- // Modify the calculatePlaytime method to accept Object instead of CommandSender
     public static Map<String, String> calculatePlaytime(long totalSeconds, Main main, Object sender, Translator translator) {
-        // Determine if the sender is a Player, as CommandSender cannot be cast directly to OfflinePlayer
+        // Determine if the sender is a Player
         Player player = null;
+
         if (sender instanceof Player) {
             player = (Player) sender;
         }
@@ -162,11 +162,34 @@ public class Main extends JavaPlugin {
         timeComponents.put("seconds", secondsText);
 
         String intervalColor = main.colorUtil.translateColor(main.getConfig().getString("color.interval"));
-        timeComponents.put("monthsString", intervalColor + (months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player)) + ChatColor.RESET);
-        timeComponents.put("daysString", intervalColor + (days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player)) + ChatColor.RESET);
-        timeComponents.put("hoursString", intervalColor + (hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player)) + ChatColor.RESET);
-        timeComponents.put("minutesString", intervalColor + (minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player)) + ChatColor.RESET);
-        timeComponents.put("secondsString", intervalColor + (seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player) + ChatColor.RESET) + ChatColor.RESET);
+        
+        // Use a default translation if the player is null
+        String monthsString = months == 1
+            ? (player != null ? translator.getTranslation("playtime.time.months.singular", player) : translator.getConsoleTranslation("playtime.time.months.singular"))
+            : (player != null ? translator.getTranslation("playtime.time.months.plural", player) : translator.getConsoleTranslation("playtime.time.months.plural"));
+            
+        String daysString = days == 1
+            ? (player != null ? translator.getTranslation("playtime.time.days.singular", player) : translator.getConsoleTranslation("playtime.time.days.singular"))
+            : (player != null ? translator.getTranslation("playtime.time.days.plural", player) : translator.getConsoleTranslation("playtime.time.days.plural"));
+            
+        String hoursString = hours == 1
+            ? (player != null ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getConsoleTranslation("playtime.time.hours.singular"))
+            : (player != null ? translator.getTranslation("playtime.time.hours.plural", player) : translator.getConsoleTranslation("playtime.time.hours.plural"));
+            
+        String minutesString = minutes == 1
+            ? (player != null ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getConsoleTranslation("playtime.time.minutes.singular"))
+            : (player != null ? translator.getTranslation("playtime.time.minutes.plural", player) : translator.getConsoleTranslation("playtime.time.minutes.plural"));
+            
+        String secondsString = seconds == 1
+            ? (player != null ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getConsoleTranslation("playtime.time.seconds.singular"))
+            : (player != null ? translator.getTranslation("playtime.time.seconds.plural", player) : translator.getConsoleTranslation("playtime.time.seconds.plural"));
+            
+        // Add the translated strings to timeComponents
+        timeComponents.put("monthsString", intervalColor + monthsString + ChatColor.RESET);
+        timeComponents.put("daysString", intervalColor + daysString + ChatColor.RESET);
+        timeComponents.put("hoursString", intervalColor + hoursString + ChatColor.RESET);
+        timeComponents.put("minutesString", intervalColor + minutesString + ChatColor.RESET);
+        timeComponents.put("secondsString", intervalColor + secondsString + ChatColor.RESET);
 
         return timeComponents;
     }

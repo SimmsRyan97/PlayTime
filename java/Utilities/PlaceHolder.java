@@ -10,10 +10,10 @@ import com.whiteiverson.minecraft.playtime_plugin.Main;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 public class PlaceHolder extends PlaceholderExpansion {
-	private final Main main;
-	
-	public PlaceHolder() {
-		this.main = Main.getInstance();
+    private final Main main;
+    
+    public PlaceHolder() {
+        this.main = Main.getInstance();
     }
 
     @Override
@@ -35,14 +35,15 @@ public class PlaceHolder extends PlaceholderExpansion {
     public boolean persist() {
         return true; // This ensures the placeholder stays registered
     }
-
-    public String onPlaceholderRequest(OfflinePlayer offlinePlayer, String identifier) {
-        if (offlinePlayer == null || offlinePlayer.getUniqueId() == null) {
-            return "";
+    
+    @Override
+    public String onRequest(OfflinePlayer offlinePlayer, String identifier) {
+        if (offlinePlayer == null) {
+            return "";  // Safely return an empty string if called without a player
         }
         
         UUID playerUUID = offlinePlayer.getUniqueId();
-        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(playerUUID);
+        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(playerUUID);  // No cast needed
         String joinDate = main.getUserHandler().getUserJoinDate(playerUUID);
 
         Map<String, String> timeComponents = Main.calculatePlaytime(playtimeSeconds, main, offlinePlayer, main.getTranslator());
@@ -68,7 +69,7 @@ public class PlaceHolder extends PlaceholderExpansion {
                 long minutes = playtimeSeconds / 60;
                 return minutes + " " + (minutes == 1 ? "minute" : "minutes");
             case "playtime_in_seconds":
-                return playtimeSeconds + " " + (playtimeSeconds == 1 ? "second" : "seconds");
+                return playtimeSeconds + " " + ( playtimeSeconds == 1 ? "second" : "seconds");
             case "playtime_join_date":
                 return joinDate;
 

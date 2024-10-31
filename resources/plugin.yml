@@ -1,5 +1,5 @@
 name: PlayTime
-version: 1.6.1
+version: 1.6.3
 main: com.whiteiverson.minecraft.playtime_plugin.Main
 api-version: 1.18
 author: WhiteIverson97
@@ -29,11 +29,12 @@ commands:
 
 permissions:
   playtime.*:
+    description: gives all playtime permissions
     default: false
     children:
-      playtime.check: true
-      playtime.top: true
-      playtime.reload: true
+        playtime.check: true
+        playtime.top: true
+        playtime.reload: true
   playtime.check:
     description: Allows players to check their playtime.
     default: true
@@ -42,4 +43,4 @@ permissions:
     default: true
   playtime.reload:
     description: Reload plugin after config changes.
-    default: false
+    default: op
