@@ -75,7 +75,7 @@ public class Translator {
         }
     }
 
-    private void loadDefaultLanguage() {
+    public void loadDefaultLanguage() {
         // Load the default language file from config
         String defaultLang = main.getConfig().getString("lang", "en");  // Default to English if not set
         File langFolder = new File(main.getDataFolder(), "lang");
@@ -111,12 +111,22 @@ public class Translator {
     }
 
     // Fetching translated string by key
-    public String getTranslation(String key, Player player) {
-        String lang = getPlayerLocale(player);  // Get player's language
-        FileConfiguration langConfig = getLanguageConfig(lang);  // Load the corresponding language file
+    public String getTranslation(String key, Object sender) {
+    	
+        // Determine if the sender is a Player
+        Player player = null;
 
-        // Return the translated string or fallback to English/default
-        return langConfig.getString(key, "Translation not found for key: " + key);
+        if (sender instanceof Player) {
+            player = (Player) sender;
+            
+            String lang = getPlayerLocale(player);  // Get player's language
+            FileConfiguration langConfig = getLanguageConfig(lang);  // Load the corresponding language file
+
+            // Return the translated string or fallback to English/default
+            return langConfig.getString(key, "Translation not found for key: " + key);
+        } else {
+        	return getConsoleTranslation(key); // Fallback if sender is null or console - mainly used for placeholders
+        }
     }
 
     // Fetching translated string for the console

@@ -43,7 +43,7 @@ public class PlaceHolder extends PlaceholderExpansion {
         }
         
         UUID playerUUID = offlinePlayer.getUniqueId();
-        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(playerUUID);  // No cast needed
+        long playtimeSeconds = (long) main.getUserHandler().getPlaytime(playerUUID);
         String joinDate = main.getUserHandler().getUserJoinDate(playerUUID);
 
         Map<String, String> timeComponents = Main.calculatePlaytime(playtimeSeconds, main, offlinePlayer, main.getTranslator());
@@ -60,17 +60,35 @@ public class PlaceHolder extends PlaceholderExpansion {
 
             case "playtime_in_months":
                 return timeComponents.get("months") + " " + timeComponents.get("monthsString");
+
             case "playtime_in_days":
-                return timeComponents.get("days") + " " + timeComponents.get("daysString");
+                long days = playtimeSeconds / 86400;
+                String daysString = days == 1 
+                    ? main.getTranslator().getTranslation("playtime.time.days.singular", offlinePlayer)
+                    : main.getTranslator().getTranslation("playtime.time.days.plural", offlinePlayer);
+                return  main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + days + " " + daysString;
+
             case "playtime_in_hours":
                 long hours = playtimeSeconds / 3600;
-                return hours + " " + (hours == 1 ? "hour" : "hours");
+                String hoursString = hours == 1 
+                    ? main.getTranslator().getTranslation("playtime.time.hours.singular", offlinePlayer)
+                    : main.getTranslator().getTranslation("playtime.time.hours.plural", offlinePlayer);
+                return  main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + hours + " " + hoursString;
+
             case "playtime_in_minutes":
                 long minutes = playtimeSeconds / 60;
-                return minutes + " " + (minutes == 1 ? "minute" : "minutes");
+                String minutesString = minutes == 1 
+                    ? main.getTranslator().getTranslation("playtime.time.minutes.singular", offlinePlayer)
+                    : main.getTranslator().getTranslation("playtime.time.minutes.plural", offlinePlayer);
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + minutes + " " + minutesString;
+
             case "playtime_in_seconds":
-                return playtimeSeconds + " " + ( playtimeSeconds == 1 ? "second" : "seconds");
-            case "playtime_join_date":
+                String secondsString = playtimeSeconds == 1 
+                    ? main.getTranslator().getTranslation("playtime.time.seconds.singular", offlinePlayer)
+                    : main.getTranslator().getTranslation("playtime.time.seconds.plural", offlinePlayer);
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + playtimeSeconds + " " + secondsString;
+
+            case "join_date":
                 return joinDate;
 
             default:
