@@ -74,7 +74,7 @@ public class UserHandler implements Listener {
                 return;
             }
         }
-
+        
         // Add the username if it's not already set
         if (!userConfig.contains("username")) {
             Player player = Bukkit.getPlayer(uuid); 

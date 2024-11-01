@@ -50,7 +50,7 @@ public class PlaceHolder extends PlaceholderExpansion {
 
         switch (identifier) {
             case "total":
-                // Show time with intervals in total playtime
+                // Show time with intervals in total play time
                 return String.format("%s %s %s %s %s",
                     timeComponents.get("months") + " " + timeComponents.get("monthsString"),
                     timeComponents.get("days") + " " + timeComponents.get("daysString"),
@@ -62,29 +62,29 @@ public class PlaceHolder extends PlaceholderExpansion {
             case "in_months":
             	// Calculate and display only numeric months
             	long months = playtimeSeconds / 2628000; // Approximate amount of seconds in an average month
-            	return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + months;
+            	return String.valueOf(months);
 
             case "in_days":
                 // Calculate and display only numeric days
                 long days = playtimeSeconds / 86400;
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + days;
+                return String.valueOf(days);
 
             case "in_hours":
                 // Calculate and display only numeric hours
                 long hours = playtimeSeconds / 3600;
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + hours;
+                return String.valueOf(hours);
 
             case "in_minutes":
                 // Calculate and display only numeric minutes
                 long minutes = playtimeSeconds / 60;
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + minutes;
+                return String.valueOf(minutes);
 
             case "in_seconds":
                 // Display only numeric seconds
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + playtimeSeconds;
+                return String.valueOf(playtimeSeconds);
 
             case "join_date":
-            	return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + joinDate;
+            	return joinDate;
 
             default:
                 return null;
