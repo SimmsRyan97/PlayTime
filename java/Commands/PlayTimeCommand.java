@@ -32,7 +32,7 @@ public class PlayTimeCommand implements CommandExecutor {
             player = (Player) sender;
         } else {
             sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                    main.getTranslator().getConsoleTranslation("error.player_only"));
+                    main.getTranslator().getTranslation("error.player_only", null));
             return true;
         }
 
@@ -101,9 +101,7 @@ public class PlayTimeCommand implements CommandExecutor {
         String translationKey = playerName.equals("You") ? "playtime.self" : "playtime.other";
         
         // Prepare the message with correct arguments for String.format
-        String messageTemplate = player != null 
-                ? main.getTranslator().getTranslation(translationKey, player) 
-                : main.getTranslator().getConsoleTranslation(translationKey); // Handle console case
+        String messageTemplate = main.getTranslator().getTranslation(translationKey, player);
 
         if (playerName.equals("You")) {
             // Format for the current player

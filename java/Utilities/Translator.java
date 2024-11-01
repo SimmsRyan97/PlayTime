@@ -125,7 +125,7 @@ public class Translator {
             // Return the translated string or fallback to English/default
             return langConfig.getString(key, "Translation not found for key: " + key);
         } else {
-        	return getConsoleTranslation(key); // Fallback if sender is null or console - mainly used for placeholders
+        	return getConsoleTranslation(key); // Fallback if sender is not a player
         }
     }
 

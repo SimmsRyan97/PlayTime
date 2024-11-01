@@ -49,7 +49,8 @@ public class PlaceHolder extends PlaceholderExpansion {
         Map<String, String> timeComponents = Main.calculatePlaytime(playtimeSeconds, main, offlinePlayer, main.getTranslator());
 
         switch (identifier) {
-            case "total_playtime":
+            case "total":
+                // Show time with intervals in total playtime
                 return String.format("%s %s %s %s %s",
                     timeComponents.get("months") + " " + timeComponents.get("monthsString"),
                     timeComponents.get("days") + " " + timeComponents.get("daysString"),
@@ -58,38 +59,32 @@ public class PlaceHolder extends PlaceholderExpansion {
                     timeComponents.get("seconds") + " " + timeComponents.get("secondsString")
                 ).trim();
 
-            case "playtime_in_months":
-                return timeComponents.get("months") + " " + timeComponents.get("monthsString");
+            case "in_months":
+            	// Calculate and display only numeric months
+            	long months = playtimeSeconds / 2628000; // Approximate amount of seconds in an average month
+            	return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + months;
 
-            case "playtime_in_days":
+            case "in_days":
+                // Calculate and display only numeric days
                 long days = playtimeSeconds / 86400;
-                String daysString = days == 1 
-                    ? main.getTranslator().getTranslation("playtime.time.days.singular", offlinePlayer)
-                    : main.getTranslator().getTranslation("playtime.time.days.plural", offlinePlayer);
-                return  main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + days + " " + daysString;
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + days;
 
-            case "playtime_in_hours":
+            case "in_hours":
+                // Calculate and display only numeric hours
                 long hours = playtimeSeconds / 3600;
-                String hoursString = hours == 1 
-                    ? main.getTranslator().getTranslation("playtime.time.hours.singular", offlinePlayer)
-                    : main.getTranslator().getTranslation("playtime.time.hours.plural", offlinePlayer);
-                return  main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + hours + " " + hoursString;
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + hours;
 
-            case "playtime_in_minutes":
+            case "in_minutes":
+                // Calculate and display only numeric minutes
                 long minutes = playtimeSeconds / 60;
-                String minutesString = minutes == 1 
-                    ? main.getTranslator().getTranslation("playtime.time.minutes.singular", offlinePlayer)
-                    : main.getTranslator().getTranslation("playtime.time.minutes.plural", offlinePlayer);
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + minutes + " " + minutesString;
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + minutes;
 
-            case "playtime_in_seconds":
-                String secondsString = playtimeSeconds == 1 
-                    ? main.getTranslator().getTranslation("playtime.time.seconds.singular", offlinePlayer)
-                    : main.getTranslator().getTranslation("playtime.time.seconds.plural", offlinePlayer);
-                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer"))  + playtimeSeconds + " " + secondsString;
+            case "in_seconds":
+                // Display only numeric seconds
+                return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + playtimeSeconds;
 
             case "join_date":
-                return joinDate;
+            	return main.getColorUtil().translateColor(main.getConfig().getString("color.integer")) + joinDate;
 
             default:
                 return null;

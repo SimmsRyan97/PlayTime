@@ -27,7 +27,7 @@ public class PlayTimeTopCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-        	sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + main.getTranslator().getConsoleTranslation("error.player_only"));
+        	sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) + main.getTranslator().getTranslation("error.player_only", null));
             return true;
         }
 

@@ -47,7 +47,7 @@ public class Main extends JavaPlugin {
         saveDefaultConfig();
 
         // Output loading message in console using console-specific translation method
-        getLogger().info(translator.getConsoleTranslation("plugin.loading")); // For console
+        getLogger().info(translator.getTranslation("plugin.loading", null)); // For console
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
@@ -71,7 +71,7 @@ public class Main extends JavaPlugin {
         }
 
         // Output success message in console using console-specific translation method
-        getLogger().info(translator.getConsoleTranslation("plugin.load_success")); // For console
+        getLogger().info(translator.getTranslation("plugin.load_success", null)); // For console
     }
 
     private void registerCommands() {
@@ -109,8 +109,6 @@ public class Main extends JavaPlugin {
                 } else {
                     sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.error")) + translator.getTranslation("error.no_permission", player)); // Player translation
                 }
-            } else {
-                sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.success")) + translator.getConsoleTranslation("plugin.reload")); // Console translation
             }
             return true;
         }
@@ -137,7 +135,7 @@ public class Main extends JavaPlugin {
         long secondsInAMinute = 60;
         long secondsInAnHour = 3600;
         long secondsInADay = 86400;
-        long secondsInAMonth = 2592000; // Approximation for 30 days
+        long secondsInAMonth = 2628000; // Approximation for average month
 
         long months = totalSeconds / secondsInAMonth;
         long remainingSecondsAfterMonths = totalSeconds % secondsInAMonth;
@@ -165,25 +163,15 @@ public class Main extends JavaPlugin {
         String intervalColor = main.colorUtil.translateColor(main.getConfig().getString("color.interval"));
         
         // Use a default translation if the player is null
-        String monthsString = months == 1
-            ? (player != null ? translator.getTranslation("playtime.time.months.singular", player) : translator.getConsoleTranslation("playtime.time.months.singular"))
-            : (player != null ? translator.getTranslation("playtime.time.months.plural", player) : translator.getConsoleTranslation("playtime.time.months.plural"));
+        String monthsString = months == 1 ? translator.getTranslation("playtime.time.months.singular", player) : translator.getTranslation("playtime.time.months.plural", player);
             
-        String daysString = days == 1
-            ? (player != null ? translator.getTranslation("playtime.time.days.singular", player) : translator.getConsoleTranslation("playtime.time.days.singular"))
-            : (player != null ? translator.getTranslation("playtime.time.days.plural", player) : translator.getConsoleTranslation("playtime.time.days.plural"));
+        String daysString = days == 1 ? translator.getTranslation("playtime.time.days.singular", player) : translator.getTranslation("playtime.time.days.plural", player);
             
-        String hoursString = hours == 1
-            ? (player != null ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getConsoleTranslation("playtime.time.hours.singular"))
-            : (player != null ? translator.getTranslation("playtime.time.hours.plural", player) : translator.getConsoleTranslation("playtime.time.hours.plural"));
+        String hoursString = hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player);
             
-        String minutesString = minutes == 1
-            ? (player != null ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getConsoleTranslation("playtime.time.minutes.singular"))
-            : (player != null ? translator.getTranslation("playtime.time.minutes.plural", player) : translator.getConsoleTranslation("playtime.time.minutes.plural"));
+        String minutesString = minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player);;
             
-        String secondsString = seconds == 1
-            ? (player != null ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getConsoleTranslation("playtime.time.seconds.singular"))
-            : (player != null ? translator.getTranslation("playtime.time.seconds.plural", player) : translator.getConsoleTranslation("playtime.time.seconds.plural"));
+        String secondsString = seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player);
             
         // Add the translated strings to timeComponents
         timeComponents.put("monthsString", intervalColor + monthsString + ChatColor.RESET);

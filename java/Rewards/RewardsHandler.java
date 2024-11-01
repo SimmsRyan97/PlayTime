@@ -56,11 +56,11 @@ public class RewardsHandler {
                 if (name != null && !commands.isEmpty()) {
                     rewards.add(new Rewards(name, time, commands));
                 } else {
-                    Bukkit.getLogger().warning(main.getTranslator().getConsoleTranslation("rewards.invalid_key") + key);
+                    Bukkit.getLogger().warning(main.getTranslator().getTranslation("rewards.invalid_key", null) + key);
                 }
             }
         } else {
-            Bukkit.getLogger().warning(main.getTranslator().getConsoleTranslation("rewards.no_rewards"));
+            Bukkit.getLogger().warning(main.getTranslator().getTranslation("rewards.no_rewards", null));
         }
     }
 
@@ -98,7 +98,7 @@ public class RewardsHandler {
                 }
 
                 if (main.getConfig().getBoolean("logging.reward-claims")) {
-                    Bukkit.getLogger().info(player.getName() + main.getTranslator().getConsoleTranslation("rewards.earned") + reward.getName());
+                    Bukkit.getLogger().info(player.getName() + main.getTranslator().getTranslation("rewards.earned", null) + reward.getName());
                 }
 
                 // Update last reward processing time

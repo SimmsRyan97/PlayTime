@@ -92,7 +92,7 @@ public class UserHandler implements Listener {
         if (!userConfig.contains("playtime")) {
             userConfig.set("playtime", 0.0);  // Initialise play time
             if (main.getConfig().getBoolean("logging.debug", false)) {
-                main.getLogger().info(main.getTranslator().getConsoleTranslation("user.initial") + uuid);
+                main.getLogger().info(main.getTranslator().getTranslation("user.initial", null) + uuid);
             }
         }
 
