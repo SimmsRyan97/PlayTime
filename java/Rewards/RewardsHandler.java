@@ -94,7 +94,7 @@ public class RewardsHandler {
                 	earnedColor = main.getColorUtil().translateColor(main.getConfig().getString("color.earned"));
                 	rewardsColor = main.getColorUtil().translateColor(main.getConfig().getString("color.reward"));
                 	
-                    Bukkit.broadcastMessage(playerNameColor + player.getName() + earnedColor + main.getTranslator().getTranslation("rewards.earned", player) + rewards + rewardsColor + reward.getName());
+                    Bukkit.broadcastMessage(playerNameColor + player.getName() + earnedColor + main.getTranslator().getTranslation("rewards.earned", player) + rewardsColor + reward.getName());
                 }
 
                 if (main.getConfig().getBoolean("logging.reward-claims")) {
