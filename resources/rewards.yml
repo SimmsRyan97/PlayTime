@@ -42,7 +42,7 @@ rewards:
       - "lp user %player% promote time-ranks"
 
   Netherite: # Netherite rank reward for 3 months of playtime
-    name: "Emerald - 3 months"
+    name: "Netherite - 3 months"
     time: 7889400.0
     commands:
       - "lp user %player% promote time-ranks"

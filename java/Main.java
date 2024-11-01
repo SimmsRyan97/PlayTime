@@ -101,14 +101,11 @@ public class Main extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if ("ptreload".equalsIgnoreCase(cmd.getName())) {
-            if (sender instanceof Player) {
-                Player player = (Player) sender;
-                if (sender.hasPermission("playtime.reload")) {
-                    reloadPlugin();
-                    sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.success")) + translator.getTranslation("plugin.reload", player)); // Player translation
-                } else {
-                    sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.error")) + translator.getTranslation("error.no_permission", player)); // Player translation
-                }
+            if (sender.hasPermission("playtime.reload")) {
+                reloadPlugin();
+                sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.success")) + translator.getTranslation("plugin.reload", sender));
+            } else {
+            	sender.sendMessage(colorUtil.translateColor(getConfig().getString("color.error")) + translator.getTranslation("error.no_permission", sender));
             }
             return true;
         }

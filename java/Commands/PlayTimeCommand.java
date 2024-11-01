@@ -27,36 +27,26 @@ public class PlayTimeCommand implements CommandExecutor {
             return false;
         }
 
-        Player player = null;
-        if (sender instanceof Player) {
-            player = (Player) sender;
-        } else {
-            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                    main.getTranslator().getTranslation("error.player_only", null));
-            return true;
-        }
-
-        if (!main.getConfig().getBoolean("commands.pt.enabled", true)) {
-            sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                    main.getTranslator().getTranslation("error.command_disabled", player));
-            return true;
-        }
-
         UUID targetUUID;
         String playerName;
         String joinDate;
 
-        // Determine if the command is for the self or another player
+        // Determine target player
         if (args.length == 0) {
+            // Self-playtime check, ensure sender is a player
+            if (!(sender instanceof Player)) {
+                return true;
+            }
+            Player player = (Player) sender;
             targetUUID = player.getUniqueId();
             playerName = "You";
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
         } else {
             playerName = args[0];
 
-            if (!sender.hasPermission("playtime.check")) {
+            if (sender instanceof Player && !sender.hasPermission("playtime.check")) {
                 sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                        main.getTranslator().getTranslation("error.no_permission", player));
+                        main.getTranslator().getTranslation("error.no_permission", sender));
                 return true;
             }
 
@@ -73,16 +63,11 @@ public class PlayTimeCommand implements CommandExecutor {
                     playerName = offlinePlayer.getName();
                 } else {
                     sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                            main.getTranslator().getTranslation("error.no_user", player));
+                            main.getTranslator().getTranslation("error.no_user", sender));
                     return true;
                 }
             }
-
             joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
-
-            if (targetUUID.equals(player.getUniqueId())) {
-                playerName = "You"; // Update name to "You" if the target is the player executing the command
-            }
         }
 
         double playtime = main.getUserHandler().getPlaytime(targetUUID);
@@ -91,19 +76,19 @@ public class PlayTimeCommand implements CommandExecutor {
         Map<String, String> timeComponents = Main.calculatePlaytime(totalSeconds, main, sender, main.getTranslator());
         String date = main.getColorUtil().translateColor(main.getConfig().getString("color.interval")) + joinDate + ChatColor.RESET;
 
-        String message = formatPlaytimeMessage(playerName, timeComponents, date, player);
-
+        String message = formatPlaytimeMessage(playerName, timeComponents, date, sender);
         sender.sendMessage(message);
         return true;
     }
 
-    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, Player player) {
-        String translationKey = playerName.equals("You") ? "playtime.self" : "playtime.other";
+    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, CommandSender sender) {
+        boolean isSelf = sender instanceof Player && playerName.equals("You");
+        String translationKey = isSelf ? "playtime.self" : "playtime.other";
         
         // Prepare the message with correct arguments for String.format
-        String messageTemplate = main.getTranslator().getTranslation(translationKey, player);
+        String messageTemplate = main.getTranslator().getTranslation(translationKey, sender);
 
-        if (playerName.equals("You")) {
+        if (isSelf) {
             // Format for the current player
             return String.format(messageTemplate,
                     timeComponents.get("months"), timeComponents.get("monthsString"),
@@ -114,7 +99,7 @@ public class PlayTimeCommand implements CommandExecutor {
                     date // Join date
             );
         } else {
-            // Format for other players
+            // Format for other players (or console target)
             return String.format(messageTemplate,
                     playerName, // Add the player name here
                     timeComponents.get("months"), timeComponents.get("monthsString"),

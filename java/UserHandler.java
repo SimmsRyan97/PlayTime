@@ -61,7 +61,6 @@ public class UserHandler implements Listener {
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
         FileConfiguration userConfig;
 
-        // Load existing config or create a new file
         if (userFile.exists()) {
             userConfig = YamlConfiguration.loadConfiguration(userFile);
         } else {
@@ -76,29 +75,34 @@ public class UserHandler implements Listener {
             }
         }
 
-        // Add the username to the config if it's not already set
+        // Add the username if it's not already set
         if (!userConfig.contains("username")) {
-            Player player = Bukkit.getPlayer(uuid);  // Try to get online player
-
+            Player player = Bukkit.getPlayer(uuid); 
             if (player != null) {
-                userConfig.set("username", player.getName());  // Set the online player's name
+                userConfig.set("username", player.getName());
             } else {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);  // Handle offline player
-                userConfig.set("username", offlinePlayer.getName());  // Set the offline player's name
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                userConfig.set("username", offlinePlayer.getName());
             }
         }
 
-        // Initialise play time if it's not already set
+        // Check if joined is missing, and if so, set it
+        if (!userConfig.contains("joined")) {
+            String joinDate = setUserJoinDate(uuid);
+            userConfig.set("joined", joinDate);
+        }
+
+        // Initialise playtime if not already set
         if (!userConfig.contains("playtime")) {
-            userConfig.set("playtime", 0.0);  // Initialise play time
+            userConfig.set("playtime", 0.0);
             if (main.getConfig().getBoolean("logging.debug", false)) {
                 main.getLogger().info(main.getTranslator().getTranslation("user.initial", null) + uuid);
             }
         }
 
         loadRewardsForUser(userConfig);
-        saveUserData(uuid);  // Save the updated user data
-        userConfigs.put(uuid, userConfig);  // Cache the config
+        saveUserData(uuid);
+        userConfigs.put(uuid, userConfig);
     }
 
     private void loadRewardsForUser(FileConfiguration userConfig) {
@@ -124,25 +128,37 @@ public class UserHandler implements Listener {
             });
         }
     }
-
+    
     /**
-     * Retrieves the user's join date.
+     * Determines the join date based on the player's first played date or today's date if never played before.
      *
-     * @param uuid The UUID of the user.
-     * @return The join date as a string or "Date not found" if it doesn't exist.
+     * @param uuid The UUID of the player.
+     * @return The join date as a string in dd.MM.yyyy format.
      */
-    public String getUserJoinDate(UUID uuid) {
+    private String setUserJoinDate(UUID uuid) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-        
         if (offlinePlayer.hasPlayedBefore()) {
-            // If the player has played before, return their first played date
             Date joinDate = new Date(offlinePlayer.getFirstPlayed());
             return new SimpleDateFormat("dd.MM.yyyy").format(joinDate);
         } else {
-            // If the player hasn't played before, return today's date
             Date currentDate = new Date();
             return new SimpleDateFormat("dd.MM.yyyy").format(currentDate);
         }
+    }
+
+    /**
+     * Retrieves the user's join date from their config data.
+     *
+     * @param uuid The UUID of the user.
+     * @return The join date as a string.
+     */
+    public String getUserJoinDate(UUID uuid) {
+        FileConfiguration userConfig = userConfigs.get(uuid);
+        if (userConfig == null) {
+            loadUserData(uuid);
+            userConfig = userConfigs.get(uuid);
+        }
+        return userConfig.getString("joined", "Unknown");
     }
 
     /**
