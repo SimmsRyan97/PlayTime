@@ -1,3 +1,5 @@
+// Updated ColorUtil.java with improved version parsing
+
 package com.whiteiverson.minecraft.playtime_plugin.Utilities;
 
 import org.bukkit.Bukkit;
@@ -31,23 +33,25 @@ public class ColorUtil {
         return ChatColor.translateAlternateColorCodes('&', input);
     }
 
-    // Helper method to check if the server supports hex colors (1.16+)
+    // Improved version parsing to handle unexpected formats
     private boolean isHexColorSupported() {
         String version = Bukkit.getServer().getBukkitVersion();
         
-        // Extract the version part, typically the format is like "1.16.5-R0.1-SNAPSHOT"
+        // Regex to match version numbers like "1.16", "1.16.5", "21-R0", etc.
         String[] versionParts = version.split("\\.");
         
         try {
-            int majorVersion = Integer.parseInt(versionParts[0]);
-            int minorVersion = Integer.parseInt(versionParts[1]);
+            // Parse major version
+            int majorVersion = Integer.parseInt(versionParts[0].replaceAll("[^\\d]", ""));
+            
+            // Check if we have a minor version and parse it if available
+            int minorVersion = versionParts.length > 1 ? Integer.parseInt(versionParts[1].replaceAll("[^\\d]", "")) : 0;
 
             // Hex colors are supported from version 1.16 and onwards
-            if (majorVersion > 1 || (majorVersion == 1 && minorVersion >= 16)) {
-                return true;
-            }
+            return majorVersion > 1 || (majorVersion == 1 && minorVersion >= 16);
+
         } catch (NumberFormatException e) {
-            // If the version is in an unexpected format, default to false
+            // Log an error message to warn of unexpected version format and default to false
             e.printStackTrace();
         }
 

@@ -1,5 +1,6 @@
 package com.whiteiverson.minecraft.playtime_plugin;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +14,8 @@ import net.md_5.bungee.api.ChatColor;
 
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeTopCommand;
+import com.whiteiverson.minecraft.playtime_plugin.Database.DatabaseManager;
+import com.whiteiverson.minecraft.playtime_plugin.Database.UserDataManager;
 import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.ColorUtil;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.PlaceHolder;
@@ -25,6 +28,8 @@ public class Main extends JavaPlugin {
     private UserHandler userHandler;
     private Translator translator;
     private ColorUtil colorUtil;
+    private DatabaseManager databaseManager;
+	private UserDataManager userDataManager;
 
     // To handle reward cooldowns
     private Map<UUID, Long> rewardCooldowns = new HashMap<>();
@@ -40,7 +45,7 @@ public class Main extends JavaPlugin {
         // Instantiate the Translator
         translator = new Translator();
         
-        // Initiate the Colors
+        // Initiate the Colours
         colorUtil = new ColorUtil();
 
         // Load config.yml
@@ -48,6 +53,18 @@ public class Main extends JavaPlugin {
 
         // Output loading message in console using console-specific translation method
         getLogger().info(translator.getTranslation("plugin.loading", null)); // For console
+        
+        // Initialise DatabaseManager and UserDataManager
+        databaseManager = new DatabaseManager(getConfig(), getLogger());
+        try {
+            databaseManager.connect(); // Connect to the database
+
+            // Initialise UserDataManager for managing user data
+            userDataManager = new UserDataManager(databaseManager);
+
+        } catch (SQLException e) {
+            getLogger().severe("Failed to connect to the database. Disabling database features.");
+        }
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
@@ -96,6 +113,10 @@ public class Main extends JavaPlugin {
     public void onDisable() {
         // Ensure to save any necessary data here, if applicable
         instance = null;
+        
+        if (databaseManager != null) {
+            databaseManager.close();
+        }
     }
 
     @Override
@@ -202,5 +223,13 @@ public class Main extends JavaPlugin {
     
     public ColorUtil getColorUtil() {
     	return colorUtil;
+    }
+    
+    public DatabaseManager getDatabaseManager() {
+    	return databaseManager;
+    }
+    
+    public UserDataManager getUserDataManager() {
+    	return userDataManager;
     }
 }

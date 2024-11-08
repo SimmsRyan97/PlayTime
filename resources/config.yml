@@ -3,7 +3,9 @@ lang: "en" # Set to your desired console language - see list in lang folder
 
 rewards:
   enabled: true # Master toggle to enable/disable the rewards system
-  broadcast: true # Whether to broadcast messages to the server when rewards are given
+  broadcast:
+    chat: true # Whether to broadcast messages to the server when rewards are given
+    discord: false # Whether to broadcast messages to the Discord server-chat when rewards are given (requires DiscordSRV or EssentialsXDiscord)
   reward-cooldown: 60 # Minimum time (in seconds) between processing rewards for the same player
 
 playtime:

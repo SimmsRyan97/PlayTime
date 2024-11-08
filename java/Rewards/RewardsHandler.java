@@ -5,6 +5,10 @@ import org.bukkit.entity.Player;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 
+import com.earth2me.essentials.Essentials;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -24,7 +28,7 @@ public class RewardsHandler {
     }
     
     public void enable() {
-    	setupRewards(); // Setup rewards in the constructor
+        setupRewards(); // Setup rewards in the constructor
     }
 
     /**
@@ -88,13 +92,26 @@ public class RewardsHandler {
                 markRewardAsClaimed(uuid, reward, true); // Mark reward as claimed
 
                 // Broadcast reward to the server if broadcasting is enabled
-                if (main.getConfig().getBoolean("rewards.broadcast")) {
-                	String playerNameColor, earnedColor, rewardsColor;
-                	playerNameColor = main.getColorUtil().translateColor(main.getConfig().getString("color.user"));
-                	earnedColor = main.getColorUtil().translateColor(main.getConfig().getString("color.earned"));
-                	rewardsColor = main.getColorUtil().translateColor(main.getConfig().getString("color.reward"));
-                	
+                if (main.getConfig().getBoolean("rewards.broadcast.chat")) {
+                    String playerNameColor, earnedColor, rewardsColor;
+                    playerNameColor = main.getColorUtil().translateColor(main.getConfig().getString("color.user"));
+                    earnedColor = main.getColorUtil().translateColor(main.getConfig().getString("color.earned"));
+                    rewardsColor = main.getColorUtil().translateColor(main.getConfig().getString("color.reward"));
+                    
+                    // Broadcast to Minecraft server
                     Bukkit.broadcastMessage(playerNameColor + player.getName() + earnedColor + main.getTranslator().getTranslation("rewards.earned", player) + rewardsColor + reward.getName());
+                }
+
+                if(main.getConfig().getBoolean("rewards.broadcast.discord")) {
+                    // Check if EssentialsX is installed and use its API to send a Discord message
+                    if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
+                        sendToDiscordEssentials(player, reward);
+                    }
+
+                    // Check if DiscordSRV is installed and use its API to send a Discord message
+                    if (Bukkit.getPluginManager().isPluginEnabled("DiscordSRV")) {
+                        sendToDiscordDiscordSRV(player, reward);
+                    }
                 }
 
                 if (main.getConfig().getBoolean("logging.reward-claims")) {
@@ -105,6 +122,43 @@ public class RewardsHandler {
                 main.getRewardCooldowns().put(uuid, currentTime);
             }
         }
+    }
+
+    /**
+     * Sends a reward message to Discord via EssentialsX.
+     *
+     * @param player The player receiving the reward.
+     * @param reward The reward being processed.
+     */
+    private void sendToDiscordEssentials(Player player, Rewards reward) {
+        // EssentialsX supports sending messages to Discord via a command or broadcast.
+        // Assuming EssentialsX is setup to broadcast to Discord, you can use the broadcast message feature:
+    	Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+    	
+    	String channelName = essentials.getConfig().getString("discord.channel", "default-channel");
+    	
+        String message = player.getName() + " has earned the reward: " + reward.getName();
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "discordbroadcast " + channelName + message);
+    }
+
+    /**
+     * Sends a reward message to Discord via DiscordSRV.
+     *
+     * @param player The player receiving the reward.
+     * @param reward The reward being processed.
+     */
+    private void sendToDiscordDiscordSRV(Player player, Rewards reward) {
+    	// Retrieve the configured channel name from DiscordSRV's config
+        String channelName = DiscordSRV.getPlugin().getConfig().getString("channel.server-chat"); // Defaults to 'server-chat'
+    	
+        // DiscordSRV allows direct communication to Discord.
+        String message = "**" + player.getName() + "** has earned the reward: **" + reward.getName() + "**";
+        // This sends a message to the default Discord channel.
+        
+        TextChannel textChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName(channelName);
+        if( textChannel != null ) {
+        	textChannel.sendMessage(message).queue();
+        }        
     }
 
     /**
