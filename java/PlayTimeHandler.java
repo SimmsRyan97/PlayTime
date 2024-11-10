@@ -73,7 +73,7 @@ public class PlayTimeHandler {
             double afkTime = userHandler.getUserConfigValue(uuid, "afk-time", 0); // Retrieve afk-time
 
             // If the user has no recorded play time, retrieve it from world files
-            if (playtime == 0) {
+            if (playtime == 0 && player.hasPlayedBefore()) {
                 playtime = retrievePlaytimeFromWorldFiles(uuid);
                 userHandler.setUserData(uuid, "playtime", playtime); // Save the retrieved play time
             }

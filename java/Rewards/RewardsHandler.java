@@ -104,7 +104,7 @@ public class RewardsHandler {
 
                 if(main.getConfig().getBoolean("rewards.broadcast.discord")) {
                     // Check if EssentialsX is installed and use its API to send a Discord message
-                    if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
+                    if (Bukkit.getPluginManager().isPluginEnabled("EssentialsDiscord")) {
                         sendToDiscordEssentials(player, reward);
                     }
 
@@ -135,7 +135,7 @@ public class RewardsHandler {
         // Assuming EssentialsX is setup to broadcast to Discord, you can use the broadcast message feature:
     	Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
     	
-    	String channelName = essentials.getConfig().getString("discord.channel", "default-channel");
+    	String channelName = essentials.getConfig().getString("channels.primary");
     	
         String message = player.getName() + " has earned the reward: " + reward.getName();
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "discordbroadcast " + channelName + message);
@@ -149,7 +149,7 @@ public class RewardsHandler {
      */
     private void sendToDiscordDiscordSRV(Player player, Rewards reward) {
     	// Retrieve the configured channel name from DiscordSRV's config
-        String channelName = DiscordSRV.getPlugin().getConfig().getString("channel.server-chat"); // Defaults to 'server-chat'
+    	String channelName = DiscordSRV.getPlugin().getConfig().getConfigurationSection("Channels").getString("global");
     	
         // DiscordSRV allows direct communication to Discord.
         String message = "**" + player.getName() + "** has earned the reward: **" + reward.getName() + "**";
