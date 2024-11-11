@@ -45,8 +45,8 @@ A huge thank you to the players from [Koinotita Gaming](https://discord.gg/hEHeT
 
 ## Future Updates
 Stay tuned for upcoming features, including:
-- **Webhooks for Discord Chat Messages**: Integration with DiscordSRV and Essentials for even more connectivity!
 - **MySQL Database**: Allow servers to use a MySQL database to store userdata
+- **GUI Menu**: Add a GUI menu for players
 
 ## Donations
 All donations are greatly appreciated but these are not mandatory whatsoever. Donate [here](https://www.paypal.com/donate/?hosted_button_id=LY743CZEZXEVL).
