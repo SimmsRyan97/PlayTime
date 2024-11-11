@@ -1,7 +1,7 @@
 # PlayTime
 
 Welcome to **PlayTime**!
-This Minecraft server plugin lets players effortlessly track their playtime, fostering a competitive spirit and community engagement. Whether you're curious about your own playtime or want to check out how others are doing, PlayTime has got you covered!
+PlayTime is designed for Minecraft servers, allowing users to effortlessly track their playtime. Not only can players check their own playtime, but they can also see the playtime of other users.
 
 ## Features
 
