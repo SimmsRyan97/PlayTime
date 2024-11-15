@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.chat.Chat;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 
@@ -15,9 +16,11 @@ import java.util.UUID;
 
 public class PlayTimeCommand implements CommandExecutor {
     private final Main main;
+    private final Chat vaultChat; // Vault Chat API for nickname handling
 
     public PlayTimeCommand(Main main) {
         this.main = main;
+        this.vaultChat = main.getChat();
     }
 
     @Override
@@ -50,12 +53,13 @@ public class PlayTimeCommand implements CommandExecutor {
                 return true;
             }
 
-            // Find the target player (online or offline)
-            Player onlinePlayer = Bukkit.getPlayerExact(playerName);
+            // Attempt to resolve the player using nickname first
+            Player onlinePlayer = resolvePlayerByNickname(playerName);
             if (onlinePlayer != null) {
                 targetUUID = onlinePlayer.getUniqueId();
                 playerName = onlinePlayer.getName();
             } else {
+                // Fallback to exact name matching for offline players
                 @SuppressWarnings("deprecation")
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
                 if (offlinePlayer.hasPlayedBefore()) {
@@ -79,6 +83,21 @@ public class PlayTimeCommand implements CommandExecutor {
         String message = formatPlaytimeMessage(playerName, timeComponents, date, sender);
         sender.sendMessage(message);
         return true;
+    }
+
+    private Player resolvePlayerByNickname(String nickname) {
+        if (vaultChat == null) {
+            // If vaultChat is null, skip nickname resolution logic
+            return null;
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String playerDisplayName = vaultChat.getPlayerPrefix(player) + player.getDisplayName() + vaultChat.getPlayerSuffix(player);
+            if (ChatColor.stripColor(playerDisplayName).equalsIgnoreCase(nickname)) {
+                return player;
+            }
+        }
+        return null;
     }
 
     private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, CommandSender sender) {

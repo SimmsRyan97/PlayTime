@@ -40,3 +40,5 @@ rewards:
   invalid_key: "Ungültige Belohnungskonfiguration für Schlüssel: "
   no_rewards: "Im rewards.yml-Configabschnitt wurden keine Belohnungen gefunden!"
   earned: " hat die Belohnung verdient: "
+  achieved: "Erreicht"
+  not_achieved: "Nicht erreicht"

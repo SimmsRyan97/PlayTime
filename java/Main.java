@@ -1,5 +1,6 @@
 package com.whiteiverson.minecraft.playtime_plugin;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +12,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.chat.Chat;
 
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeCommand;
+import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeRewardsCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Commands.PlayTimeTopCommand;
 import com.whiteiverson.minecraft.playtime_plugin.Database.DatabaseManager;
 import com.whiteiverson.minecraft.playtime_plugin.Database.UserDataManager;
@@ -30,6 +33,8 @@ public class Main extends JavaPlugin {
     private ColorUtil colorUtil;
     private DatabaseManager databaseManager;
 	private UserDataManager userDataManager;
+	private Chat vaultChat;
+	private File rewardsFile;
 
     // To handle reward cooldowns
     private Map<UUID, Long> rewardCooldowns = new HashMap<>();
@@ -65,6 +70,8 @@ public class Main extends JavaPlugin {
         } catch (SQLException e) {
             getLogger().severe("Failed to connect to the database. Disabling database features.");
         }
+        
+        rewardsFile = new File(getDataFolder(), "rewards.yml");
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
@@ -94,6 +101,7 @@ public class Main extends JavaPlugin {
     private void registerCommands() {
         registerCommand("pt", new PlayTimeCommand(this));
         registerCommand("pttop", new PlayTimeTopCommand(this));
+        registerCommand("ptrewards", new PlayTimeRewardsCommand(userHandler, rewardsFile));
         registerCommand("ptreload", this);
     }
 
@@ -199,6 +207,16 @@ public class Main extends JavaPlugin {
         timeComponents.put("secondsString", intervalColor + secondsString + ChatColor.RESET);
 
         return timeComponents;
+    }
+    
+    public Chat getChat() {
+        if (vaultChat == null) {
+            if (getServer().getPluginManager().getPlugin("Vault") != null) {
+                // Fetch the chat provider via the Vault service
+                vaultChat = getServer().getServicesManager().load(Chat.class);
+            }
+        }
+        return vaultChat;
     }
 
     public RewardsHandler getRewardsHandler() {

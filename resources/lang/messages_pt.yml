@@ -40,3 +40,5 @@ rewards:
   invalid_key: "Configuração de recompensa inválida para a chave: "
   no_rewards: "Nenhuma seção de recompensas encontrada no arquivo rewards.yml!"
   earned: " ganhou a recompensa: "
+  achieved: "Alcançado"
+  not_achieved: "Não alcançado"

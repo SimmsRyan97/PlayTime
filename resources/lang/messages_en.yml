@@ -40,3 +40,5 @@ rewards:
   invalid_key: "Invalid reward configuration for key: "
   no_rewards: "No rewards section found in the rewards.yml config!"
   earned: " has earned the reward: "
+  achieved: "Achieved"
+  not_achieved: "Not achieved"

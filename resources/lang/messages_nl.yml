@@ -40,3 +40,5 @@ rewards:
   invalid_key: "Ongeldige beloningsconfiguratie voor sleutel: "
   no_rewards: "Geen beloningssectie gevonden in het rewards.yml-configuratiebestand!"
   earned: " heeft de beloning verdiend: "
+  achieved: "Bereikt"
+  not_achieved: "Niet bereikt"

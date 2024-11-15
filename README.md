@@ -46,8 +46,6 @@ A huge thank you to the players from [Koinotita Gaming](https://discord.gg/hEHeT
 ## Future Updates
 Stay tuned for upcoming features, including:
 - **MySQL Database**: Allow servers to use a MySQL database to store userdata
-- **Nickname Search**: Allow users to search by nickname or username
-- **Reward list**: Allow users to see their current rewards and how long until the next reward
 - **GUI Menu**: Add a GUI menu for players
 
 ## Donations
