@@ -31,47 +31,50 @@ public class Translator {
     private void loadLanguageFiles() {
         File langFolder = new File(main.getDataFolder(), "lang");
         if (!langFolder.exists()) {
-            langFolder.mkdirs(); // Create the directory if it doesn't exist
+            langFolder.mkdirs();
         }
 
+        // First, copy language files from JAR (existing code)
         try {
-            // Get the resource URL for the lang folder
             java.net.URL resource = main.getClass().getClassLoader().getResource("lang");
             if (resource != null) {
-                // Use JarURLConnection to access the contents of the jar file
                 if (resource.getProtocol().equals("jar")) {
                     java.net.JarURLConnection jarConnection = (java.net.JarURLConnection) resource.openConnection();
                     try (java.util.jar.JarFile jarFile = jarConnection.getJarFile()) {
-                        // Iterate through the entries of the JAR file
                         jarFile.stream().filter(entry -> entry.getName().startsWith("lang/") && entry.getName().endsWith(".yml"))
                                 .forEach(entry -> {
-                                    String fileName = entry.getName().substring(entry.getName().lastIndexOf("/") + 1); // Get the file name
-                                    File langFile = new File(langFolder, fileName); // Destination file in plugin's data folder
+                                    String fileName = entry.getName().substring(entry.getName().lastIndexOf("/") + 1);
+                                    File langFile = new File(langFolder, fileName);
 
-                                    // Copy the file if it doesn't exist in the plugin's folder
                                     if (!langFile.exists()) {
                                         try (InputStream inputStream = jarFile.getInputStream(entry)) {
                                             if (inputStream != null) {
                                                 Files.copy(inputStream, langFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                                             }
                                         } catch (IOException e) {
-                                        	if (main.getConfig().getBoolean("logging.debug", false)) {
-                                        		main.getLogger().log(Level.SEVERE, "Failed to copy language file: " + fileName, e);
-                                        	}
+                                            if (main.getConfig().getBoolean("logging.debug", false)) {
+                                                main.getLogger().log(Level.SEVERE, "Failed to copy language file: " + fileName, e);
+                                            }
                                         }
                                     }
-
-                                    // Load and cache the configuration file
-                                    String langKey = fileName.replace(".yml", "").toLowerCase();  // e.g., "messages_en"
-                                    loadedLanguages.put(langKey, YamlConfiguration.loadConfiguration(langFile));
                                 });
                     }
                 }
             }
         } catch (Exception e) {
-        	if (main.getConfig().getBoolean("logging.debug", false)) {
-        		main.getLogger().log(Level.SEVERE, "Failed to load language files dynamically", e);
-        	}
+            if (main.getConfig().getBoolean("logging.debug", false)) {
+                main.getLogger().log(Level.SEVERE, "Failed to load language files dynamically", e);
+            }
+        }
+
+        // NOW load all language files from the lang folder (both from JAR and manually added)
+        File[] langFiles = langFolder.listFiles((dir, name) -> name.startsWith("messages_") && name.endsWith(".yml"));
+        if (langFiles != null) {
+            for (File langFile : langFiles) {
+                String langKey = langFile.getName().replace(".yml", "").toLowerCase();
+                loadedLanguages.put(langKey, YamlConfiguration.loadConfiguration(langFile));
+                main.getLogger().info("Loaded language file: " + langKey);
+            }
         }
     }
 
