@@ -62,7 +62,6 @@ A huge thank you to the players from [Koinotita Gaming](https://discord.gg/hEHeT
 
 Stay tuned for upcoming features, including:
 
-- **MySQL Database**: Allow servers to use a MySQL database to store userdata
 - **GUI Menu**: Add a GUI menu for players
 
 ## Donations
