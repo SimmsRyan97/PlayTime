@@ -18,17 +18,16 @@ import java.util.*;
 public class RewardsHandler {
     private Main main;
     private Set<Rewards> rewards;
-    private FileConfiguration rewardsConfig;
     private static final int MILLISECONDS_IN_SECOND = 1000;
 
     // Constructor to accept Main instance
     public RewardsHandler(Main main) {
-        this.main = main; // Initialise main through the constructor
-        this.rewards = new HashSet<>(); // Initialise rewards Set
+        this.main = main;
+        this.rewards = new HashSet<>();
     }
-    
+
     public void enable() {
-        setupRewards(); // Setup rewards in the constructor
+        setupRewards();
     }
 
     /**
@@ -40,15 +39,15 @@ public class RewardsHandler {
 
         // Create the file if it doesn't exist
         if (!rewardsFile.exists()) {
-            main.saveResource("rewards.yml", false); // Save default rewards.yml if it doesn't exist
+            main.saveResource("rewards.yml", false);
         }
 
-        rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+        FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
         rewards = new TreeSet<>();
 
         // Ensure rewards section exists in the configuration
         if (rewardsConfig.contains("rewards")) {
-            Set<String> rewardKeys = rewardsConfig.getConfigurationSection("rewards").getKeys(false);
+            Set<String> rewardKeys = Objects.requireNonNull(rewardsConfig.getConfigurationSection("rewards")).getKeys(false);
 
             // Loop through each reward entry in the rewards.yml
             for (String key : rewardKeys) {
@@ -80,16 +79,23 @@ public class RewardsHandler {
         // Check cool down to avoid frequent processing
         long lastProcessedTime = main.getRewardCooldowns().getOrDefault(uuid, 0L);
         int cooldown = main.getConfig().getInt("rewards.reward-cooldown", 0) * MILLISECONDS_IN_SECOND;
-        if ((currentTime - lastProcessedTime) < cooldown || cooldown <= 0) {
+
+        // FIXED: Only skip if cooldown is positive AND not enough time has passed
+        if (cooldown > 0 && (currentTime - lastProcessedTime) < cooldown) {
             return; // Skip processing if still within cool down period
         }
 
         // Iterate over each reward
         for (Rewards reward : rewards) {
+
             // Check if the player has sufficient play time and hasn't claimed the reward
             if (!hasRewardBeenClaimed(uuid, reward) && main.getPlayTimeHandler().hasSufficientPlaytime(uuid, reward.getTime())) {
+
+                // Mark as claimed FIRST, before executing commands
+                markRewardAsClaimed(uuid, reward);
+
+                // Then execute commands
                 executeRewardCommands(player, reward);
-                markRewardAsClaimed(uuid, reward, true); // Mark reward as claimed
 
                 // Broadcast reward to the server if broadcasting is enabled
                 if (main.getConfig().getBoolean("rewards.broadcast.chat")) {
@@ -97,7 +103,7 @@ public class RewardsHandler {
                     playerNameColor = main.getColorUtil().translateColor(main.getConfig().getString("color.user"));
                     earnedColor = main.getColorUtil().translateColor(main.getConfig().getString("color.earned"));
                     rewardsColor = main.getColorUtil().translateColor(main.getConfig().getString("color.reward"));
-                    
+
                     // Broadcast to Minecraft server
                     Bukkit.broadcastMessage(playerNameColor + player.getName() + earnedColor + main.getTranslator().getTranslation("rewards.earned", player) + rewardsColor + reward.getName());
                 }
@@ -131,12 +137,10 @@ public class RewardsHandler {
      * @param reward The reward being processed.
      */
     private void sendToDiscordEssentials(Player player, Rewards reward) {
-        // EssentialsX supports sending messages to Discord via a command or broadcast.
-        // Assuming EssentialsX is setup to broadcast to Discord, you can use the broadcast message feature:
-    	Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-    	
-    	String channelName = essentials.getConfig().getString("channels.primary");
-    	
+        Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+
+        String channelName = Objects.requireNonNull(essentials).getConfig().getString("channels.primary");
+
         String message = player.getName() + " has earned the reward: " + reward.getName();
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "discordbroadcast " + channelName + message);
     }
@@ -148,17 +152,14 @@ public class RewardsHandler {
      * @param reward The reward being processed.
      */
     private void sendToDiscordDiscordSRV(Player player, Rewards reward) {
-    	// Retrieve the configured channel name from DiscordSRV's config
-    	String channelName = DiscordSRV.getPlugin().getConfig().getConfigurationSection("Channels").getString("global");
-    	
-        // DiscordSRV allows direct communication to Discord.
+        String channelName = Objects.requireNonNull(DiscordSRV.getPlugin().getConfig().getConfigurationSection("Channels")).getString("global");
+
         String message = "**" + player.getName() + "** has earned the reward: **" + reward.getName() + "**";
-        // This sends a message to the default Discord channel.
-        
+
         TextChannel textChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName(channelName);
         if( textChannel != null ) {
-        	textChannel.sendMessage(message).queue();
-        }        
+            textChannel.sendMessage(message).queue();
+        }
     }
 
     /**
@@ -170,7 +171,7 @@ public class RewardsHandler {
     private void executeRewardCommands(Player player, Rewards reward) {
         for (String command : reward.getCommands()) {
             String processedCommand = command.replace("%player%", player.getName());
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand); // Execute command as console
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), processedCommand);
         }
     }
 
@@ -182,21 +183,33 @@ public class RewardsHandler {
      * @return True if the reward has been claimed, false otherwise.
      */
     private boolean hasRewardBeenClaimed(UUID uuid, Rewards reward) {
-        return Optional.ofNullable(main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName()))
-                .filter(data -> data instanceof Boolean)
-                .map(data -> (Boolean) data)
-                .orElse(false);
+        Object data = main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName());
+
+        // FIXED: Handle database returning null for non-existent keys
+        if (data == null) {
+            return false;
+        }
+
+        if (data instanceof Boolean) {
+            return (Boolean) data;
+        }
+
+        // Handle Integer from SQLite
+        if (data instanceof Integer) {
+            return ((Integer) data) != 0;
+        }
+
+        return false;
     }
 
     /**
-     * Marks a reward as claimed or unclaimed for a player.
+     * Marks a reward as claimed for a player.
      *
-     * @param uuid    The player's UUID.
-     * @param reward  The reward being marked.
-     * @param claimed Whether the reward has been claimed.
+     * @param uuid   The player's UUID.
+     * @param reward The reward being marked.
      */
-    private void markRewardAsClaimed(UUID uuid, Rewards reward, boolean claimed) {
-        main.getUserHandler().setUserData(uuid, "rewards.claimed." + reward.getName(), claimed);
+    private void markRewardAsClaimed(UUID uuid, Rewards reward) {
+        main.getUserHandler().setUserData(uuid, "rewards.claimed." + reward.getName(), true);
     }
 
     /**

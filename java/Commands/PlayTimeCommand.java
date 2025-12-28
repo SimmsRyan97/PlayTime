@@ -10,6 +10,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.chat.Chat;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class PlayTimeCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args) {
         // Command label check
         if (!(label.equalsIgnoreCase("playtime") || label.equalsIgnoreCase("pt"))) {
             return false;
@@ -33,6 +34,7 @@ public class PlayTimeCommand implements CommandExecutor {
         UUID targetUUID;
         String playerName;
         String joinDate;
+        boolean isSelf = false;
 
         // Determine target player
         if (args.length == 0) {
@@ -43,7 +45,7 @@ public class PlayTimeCommand implements CommandExecutor {
             Player player = (Player) sender;
             targetUUID = player.getUniqueId();
             playerName = "You";
-            joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
+            isSelf = true;
         } else {
             playerName = args[0];
 
@@ -57,22 +59,23 @@ public class PlayTimeCommand implements CommandExecutor {
             Player onlinePlayer = resolvePlayerByNickname(playerName);
             if (onlinePlayer != null) {
                 targetUUID = onlinePlayer.getUniqueId();
-                playerName = onlinePlayer.getName();
+                playerName = getFormattedPlayerName(onlinePlayer); // FIXED: Get formatted name with prefix/suffix
             } else {
                 // Fallback to exact name matching for offline players
                 @SuppressWarnings("deprecation")
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
                 if (offlinePlayer.hasPlayedBefore()) {
                     targetUUID = offlinePlayer.getUniqueId();
-                    playerName = offlinePlayer.getName();
+                    playerName = getFormattedPlayerName(offlinePlayer); // FIXED: Get formatted name
                 } else {
                     sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
                             main.getTranslator().getTranslation("error.no_user", sender));
                     return true;
                 }
             }
-            joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
         }
+
+        joinDate = main.getUserHandler().getUserJoinDate(targetUUID);
 
         double playtime = main.getUserHandler().getPlaytime(targetUUID);
         long totalSeconds = (long) playtime;
@@ -80,14 +83,32 @@ public class PlayTimeCommand implements CommandExecutor {
         Map<String, String> timeComponents = Main.calculatePlaytime(totalSeconds, main, sender, main.getTranslator());
         String date = main.getColorUtil().translateColor(main.getConfig().getString("color.interval")) + joinDate + ChatColor.RESET;
 
-        String message = formatPlaytimeMessage(playerName, timeComponents, date, sender);
+        String message = formatPlaytimeMessage(playerName, timeComponents, date, sender, isSelf);
         sender.sendMessage(message);
         return true;
     }
 
+    private String getFormattedPlayerName(OfflinePlayer offlinePlayer) {
+        Player onlinePlayer = offlinePlayer.getPlayer();
+
+        if (onlinePlayer != null && onlinePlayer.isOnline() && vaultChat != null) {
+            String prefix = vaultChat.getPlayerPrefix(onlinePlayer);
+            String suffix = vaultChat.getPlayerSuffix(onlinePlayer);
+            String name = onlinePlayer.getName();
+
+            // Translate color codes
+            String coloredPrefix = prefix != null ? main.getColorUtil().translateColor(prefix) : "";
+            String coloredSuffix = suffix != null ? main.getColorUtil().translateColor(suffix) : "";
+
+            return coloredPrefix + name + coloredSuffix;
+        }
+
+        // For offline players, just return their name
+        return offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";
+    }
+
     private Player resolvePlayerByNickname(String nickname) {
         if (vaultChat == null) {
-            // If vaultChat is null, skip nickname resolution logic
             return null;
         }
 
@@ -100,10 +121,9 @@ public class PlayTimeCommand implements CommandExecutor {
         return null;
     }
 
-    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, CommandSender sender) {
-        boolean isSelf = sender instanceof Player && playerName.equals("You");
+    private String formatPlaytimeMessage(String playerName, Map<String, String> timeComponents, String date, CommandSender sender, boolean isSelf) {
         String translationKey = isSelf ? "playtime.self" : "playtime.other";
-        
+
         // Prepare the message with correct arguments for String.format
         String messageTemplate = main.getTranslator().getTranslation(translationKey, sender);
 
@@ -120,7 +140,7 @@ public class PlayTimeCommand implements CommandExecutor {
         } else {
             // Format for other players (or console target)
             return String.format(messageTemplate,
-                    playerName, // Add the player name here
+                    playerName, // Player name with colored prefix/suffix
                     timeComponents.get("months"), timeComponents.get("monthsString"),
                     timeComponents.get("days"), timeComponents.get("daysString"),
                     timeComponents.get("hours"), timeComponents.get("hoursString"),

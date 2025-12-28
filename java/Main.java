@@ -4,8 +4,10 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
+//import com.whiteiverson.minecraft.playtime_plugin.Utilities.LibraryLoader;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,6 +25,7 @@ import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.ColorUtil;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.PlaceHolder;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
+import org.jetbrains.annotations.NotNull;
 
 public class Main extends JavaPlugin {
     private static Main instance;
@@ -49,38 +52,60 @@ public class Main extends JavaPlugin {
 
         // Instantiate the Translator
         translator = new Translator();
-        
+
         // Initiate the Colours
         colorUtil = new ColorUtil();
 
         // Load config.yml
         saveDefaultConfig();
 
-        // Output loading message in console using console-specific translation method
-        getLogger().info(translator.getTranslation("plugin.loading", null)); // For console
-        
+        // Output loading message
+        getLogger().info(translator.getTranslation("plugin.loading", null));
+
         // Initialise DatabaseManager and UserDataManager
-        databaseManager = new DatabaseManager(getConfig(), getLogger());
-        try {
-            databaseManager.connect(); // Connect to the database
+        databaseManager = new DatabaseManager(getConfig(), getLogger(), getDataFolder());
 
-            // Initialise UserDataManager for managing user data
-            userDataManager = new UserDataManager(databaseManager);
+        if (getConfig().getBoolean("database.enabled", false)) {
+            try {
+                databaseManager.connect();
 
-        } catch (SQLException e) {
-            getLogger().severe("Failed to connect to the database. Disabling database features.");
+                if (databaseManager.getConnection() != null && !databaseManager.getConnection().isClosed()) {
+                    userDataManager = new UserDataManager(databaseManager);
+                    getLogger().info("Database features enabled successfully.");
+                } else {
+                    getLogger().warning("Database connection is null or closed. Falling back to flat-file storage.");
+                    getConfig().set("database.enabled", false);
+                }
+            } catch (SQLException e) {
+                getLogger().severe("Failed to connect to the database: " + e.getMessage());
+                getLogger().severe("Error type: " + e.getClass().getName());
+                getLogger().warning("Falling back to flat-file storage.");
+                getConfig().set("database.enabled", false);
+
+                if (getConfig().getBoolean("logging.debug", false)) {
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                getLogger().severe("Unexpected error during database initialization: " + e.getMessage());
+                getLogger().warning("Falling back to flat-file storage.");
+                getConfig().set("database.enabled", false);
+
+                if (getConfig().getBoolean("logging.debug", false)) {
+                    e.printStackTrace();
+                }
+            }
         }
-        
+
         rewardsFile = new File(getDataFolder(), "rewards.yml");
 
         userHandler = new UserHandler();
         playTimeHandler = new PlayTimeHandler(this, userHandler);
-        rewardsHandler = new RewardsHandler(this); // Pass instance to RewardsHandler
-        
+        rewardsHandler = new RewardsHandler(this);
+
         // Initialise handlers
         userHandler.enable();
         playTimeHandler.enable();
-        
+
         manageRewards();
 
         // Register event listeners
@@ -88,14 +113,14 @@ public class Main extends JavaPlugin {
 
         // Enable commands based on config
         registerCommands();
-        
+
         // PlaceholderAPI integration
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-        	new PlaceHolder().register();
+            new PlaceHolder().register();
         }
 
-        // Output success message in console using console-specific translation method
-        getLogger().info(translator.getTranslation("plugin.load_success", null)); // For console
+        // Output success message
+        getLogger().info(translator.getTranslation("plugin.load_success", null));
     }
 
     private void registerCommands() {
@@ -107,7 +132,7 @@ public class Main extends JavaPlugin {
 
     private void registerCommand(String command, Object executor) {
         if (getCommand(command) != null) {
-            getCommand(command).setExecutor((CommandExecutor) executor);
+            Objects.requireNonNull(getCommand(command)).setExecutor((CommandExecutor) executor);
         }
     }
 
@@ -128,7 +153,7 @@ public class Main extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
         if ("ptreload".equalsIgnoreCase(cmd.getName())) {
             if (sender.hasPermission("playtime.reload")) {
                 reloadPlugin();
@@ -195,7 +220,7 @@ public class Main extends JavaPlugin {
             
         String hoursString = hours == 1 ? translator.getTranslation("playtime.time.hours.singular", player) : translator.getTranslation("playtime.time.hours.plural", player);
             
-        String minutesString = minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player);;
+        String minutesString = minutes == 1 ? translator.getTranslation("playtime.time.minutes.singular", player) : translator.getTranslation("playtime.time.minutes.plural", player);
             
         String secondsString = seconds == 1 ? translator.getTranslation("playtime.time.seconds.singular", player) : translator.getTranslation("playtime.time.seconds.plural", player);
             

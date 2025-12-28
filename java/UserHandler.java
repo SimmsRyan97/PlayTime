@@ -15,10 +15,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * UserHandler is responsible for managing user data and tracking player activity.
@@ -46,18 +45,63 @@ public class UserHandler implements Listener {
     public void enable() {
     	loadConfigValues();
     }
+
+    private boolean useDatabaseStorage() {
+        return main.getDatabaseManager() != null && main.getDatabaseManager().isEnabled();
+    }
     
     public void loadConfigValues() {
     	FileConfiguration config = main.getConfig();
     	afkThreshold = config.getLong("track-afk.afk-detection", 300000); // Default to 5 minutes if not set
     }
 
-    /**
-     * Loads user data for a specific UUID from the user data file.
-     *
-     * @param uuid The UUID of the user.
-     */
     public void loadUserData(UUID uuid) {
+        if (useDatabaseStorage()) {
+            if (main.getUserDataManager() == null) {
+                // Database is enabled but UserDataManager is null - connection failed
+                main.getLogger().severe("Database is enabled but connection failed. Falling back to file storage for " + uuid);
+                // Force disable database for this session
+                main.getConfig().set("database.enabled", false);
+                loadUserDataFromFile(uuid);
+                return;
+            }
+            loadUserDataFromDatabase(uuid);
+        } else {
+            loadUserDataFromFile(uuid);
+        }
+    }
+
+    private void loadUserDataFromDatabase(UUID uuid) {
+        try {
+            Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+
+            if (userData.isEmpty()) {
+                // User doesn't exist in database, create new entry
+                Player player = Bukkit.getPlayer(uuid);
+                String username = player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
+                String joinDate = setUserJoinDate(uuid);
+
+                main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, 0.0, 0.0);
+
+                // Load rewards
+                FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+                if (rewardsConfig.contains("rewards")) {
+                    for (String reward : Objects.requireNonNull(rewardsConfig.getConfigurationSection("rewards")).getKeys(false)) {
+                        String rewardName = rewardsConfig.getString("rewards." + reward + ".name");
+                        main.getUserDataManager().updateReward(uuid.toString(), rewardName, false);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            if (main.getConfig().getBoolean("logging.debug", false)) {
+                main.getLogger().severe("Failed to load user data from database: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void loadUserDataFromFile(UUID uuid) {
+        // Your existing file-based loading code
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
         FileConfiguration userConfig;
 
@@ -74,10 +118,9 @@ public class UserHandler implements Listener {
                 return;
             }
         }
-        
-        // Add the username if it's not already set
+
         if (!userConfig.contains("username")) {
-            Player player = Bukkit.getPlayer(uuid); 
+            Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 userConfig.set("username", player.getName());
             } else {
@@ -86,13 +129,11 @@ public class UserHandler implements Listener {
             }
         }
 
-        // Check if joined is missing, and if so, set it
         if (!userConfig.contains("joined")) {
             String joinDate = setUserJoinDate(uuid);
             userConfig.set("joined", joinDate);
         }
 
-        // Initialise playtime if not already set
         if (!userConfig.contains("playtime")) {
             userConfig.set("playtime", 0.0);
             if (main.getConfig().getBoolean("logging.debug", false)) {
@@ -120,7 +161,7 @@ public class UserHandler implements Listener {
 
         // Loop through each reward in the rewards.yml file and add the name to the claimed section if not set
         if (rewardsConfig.contains("rewards")) {
-            rewardsConfig.getConfigurationSection("rewards").getKeys(false).forEach(reward -> {
+            Objects.requireNonNull(rewardsConfig.getConfigurationSection("rewards")).getKeys(false).forEach(reward -> {
                 String rewardName = rewardsConfig.getString("rewards." + reward + ".name");
                 if (!userConfig.contains("rewards.claimed." + rewardName)) {
                     userConfig.set("rewards.claimed." + rewardName, false);  // Set initial value to false
@@ -153,67 +194,136 @@ public class UserHandler implements Listener {
      * @return The join date as a string.
      */
     public String getUserJoinDate(UUID uuid) {
-        FileConfiguration userConfig = userConfigs.get(uuid);
-        if (userConfig == null) {
-            loadUserData(uuid);
-            userConfig = userConfigs.get(uuid);
+        if (useDatabaseStorage()) {
+            try {
+                Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+                return (String) userData.getOrDefault("joined", "Unknown");
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get join date from database: " + e.getMessage());
+                }
+                return "Unknown";
+            }
+        } else {
+            FileConfiguration userConfig = userConfigs.get(uuid);
+            if (userConfig == null) {
+                loadUserData(uuid);
+                userConfig = userConfigs.get(uuid);
+            }
+            return userConfig.getString("joined", "Unknown");
         }
-        return userConfig.getString("joined", "Unknown");
     }
 
-    /**
-     * Retrieves the user's play time.
-     *
-     * @param uuid The UUID of the user.
-     * @return The play time as a double.
-     */
     public double getPlaytime(UUID uuid) {
-        return getUserConfigValue(uuid, "playtime", 0.0);
+        if (useDatabaseStorage()) {
+            try {
+                return main.getUserDataManager().getPlaytime(uuid.toString());
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get playtime from database: " + e.getMessage());
+                }
+                return 0.0;
+            }
+        } else {
+            return getUserConfigValue(uuid, "playtime", 0.0);
+        }
     }
 
-    /**
-     * Retrieves user data based on a UUID and a specific key.
-     *
-     * @param uuid The UUID of the user.
-     * @param key  The key for the data.
-     * @return The value associated with the key, or null if not found.
-     */
     public Object getUserData(UUID uuid, String key) {
-        FileConfiguration userConfig = userConfigs.get(uuid);
-        if (userConfig == null) {
-            loadUserData(uuid);  // Load the user's data if it wasn't loaded
-            userConfig = userConfigs.get(uuid);
+        if (useDatabaseStorage()) {
+            try {
+                Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+                return userData.get(key);
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get user data from database: " + e.getMessage());
+                }
+                return null;
+            }
+        } else {
+            FileConfiguration userConfig = userConfigs.get(uuid);
+            if (userConfig == null) {
+                loadUserData(uuid);
+                userConfig = userConfigs.get(uuid);
+            }
+            return userConfig != null ? userConfig.get(key) : null;
         }
-        return userConfig != null ? userConfig.get(key) : null;
     }
 
-    /**
-     * Sets user data for a specific key and UUID.
-     *
-     * @param uuid  The UUID of the user.
-     * @param key   The key to set the data.
-     * @param value The value to be set.
-     */
     public void setUserData(UUID uuid, String key, Object value) {
-        FileConfiguration userConfig = userConfigs.get(uuid);
-        if (userConfig == null) {
-            loadUserData(uuid);  // Load the user's data if it wasn't loaded
-            userConfig = userConfigs.get(uuid);
+        if (useDatabaseStorage()) {
+            try {
+                if (key.equals("playtime")) {
+                    Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+                    String username = (String) userData.getOrDefault("username", Bukkit.getOfflinePlayer(uuid).getName());
+                    String joinDate = (String) userData.getOrDefault("joined", setUserJoinDate(uuid));
+                    double afkTime = (double) userData.getOrDefault("afk-time", 0.0);
+
+                    main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, (double) value, afkTime);
+                } else if (key.equals("afk-time")) {
+                    Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+                    String username = (String) userData.getOrDefault("username", Bukkit.getOfflinePlayer(uuid).getName());
+                    String joinDate = (String) userData.getOrDefault("joined", setUserJoinDate(uuid));
+                    double playtime = (double) userData.getOrDefault("playtime", 0.0);
+
+                    main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, playtime, (double) value);
+                } else if (key.startsWith("rewards.claimed.")) {
+                    String rewardName = key.substring("rewards.claimed.".length());
+                    main.getUserDataManager().updateReward(uuid.toString(), rewardName, (boolean) value);
+                }
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to set user data in database: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            FileConfiguration userConfig = userConfigs.get(uuid);
+            if (userConfig == null) {
+                loadUserData(uuid);
+                userConfig = userConfigs.get(uuid);
+            }
+            userConfig.set(key, value);
+            saveUserData(uuid);
         }
-        userConfig.set(key, value);
-        saveUserData(uuid); // Save the user data regardless of whether they're online
     }
 
-    /**
-     * Saves the user's data to the corresponding user data file.
-     *
-     * @param uuid The UUID of the user.
-     */
     public void saveUserData(UUID uuid) {
+        if (useDatabaseStorage()) {
+            saveUserDataToDatabase(uuid);
+        } else {
+            saveUserDataToFile(uuid);
+        }
+    }
+
+    private void saveUserDataToDatabase(UUID uuid) {
+        try {
+            Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+
+            Player player = Bukkit.getPlayer(uuid);
+            String username = player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
+            String joinDate = (String) userData.getOrDefault("joined", setUserJoinDate(uuid));
+            double playtime = getPlaytime(uuid);
+            double afkTime = getUserConfigValue(uuid, "afk-time", 0.0);
+
+            main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, playtime, afkTime);
+        } catch (SQLException e) {
+            if (main.getConfig().getBoolean("logging.debug", false)) {
+                main.getLogger().severe("Failed to save user data to database: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void saveUserDataToFile(UUID uuid) {
+        if (useDatabaseStorage()) {
+            return;
+        }
+
+        // Your existing save code
         File userFile = new File(userDataFolder, uuid.toString() + ".yml");
         FileConfiguration userConfig = userConfigs.get(uuid);
 
-        // Check if the userConfig is null
         if (userConfig == null) {
             return;
         }
@@ -221,10 +331,10 @@ public class UserHandler implements Listener {
         try {
             userConfig.save(userFile);
         } catch (IOException e) {
-        	if (main.getConfig().getBoolean("logging.debug", false)) {
-	            main.getLogger().severe(e.getMessage());
-	            e.printStackTrace();
-        	}
+            if (main.getConfig().getBoolean("logging.debug", false)) {
+                main.getLogger().severe(e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -237,12 +347,29 @@ public class UserHandler implements Listener {
      * @return The value associated with the path, or the default value if not found.
      */
     public double getUserConfigValue(UUID uuid, String path, double def) {
-        FileConfiguration userConfig = userConfigs.get(uuid);
-        if (userConfig == null) {
-            loadUserData(uuid);  // Load the user's data if it wasn't loaded
-            userConfig = userConfigs.get(uuid);
+        if (useDatabaseStorage()) {
+            try {
+                Map<String, Object> userData = main.getUserDataManager().loadUser(uuid.toString());
+                if (path.equals("playtime")) {
+                    return (double) userData.getOrDefault("playtime", def);
+                } else if (path.equals("afk-time")) {
+                    return (double) userData.getOrDefault("afk-time", def);
+                }
+                return def;
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get config value from database: " + e.getMessage());
+                }
+                return def;
+            }
+        } else {
+            FileConfiguration userConfig = userConfigs.get(uuid);
+            if (userConfig == null) {
+                loadUserData(uuid);
+                userConfig = userConfigs.get(uuid);
+            }
+            return userConfig != null ? userConfig.getDouble(path, def) : def;
         }
-        return userConfig != null ? userConfig.getDouble(path, def) : def;
     }
 
     /**
@@ -273,7 +400,6 @@ public class UserHandler implements Listener {
     /**
      * Handles player join events, moves, interacts or chats
      *
-     * @param event.
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -299,11 +425,16 @@ public class UserHandler implements Listener {
         UUID uuid = event.getPlayer().getUniqueId();
         setLastActive(uuid, System.currentTimeMillis());
     }
-    
+
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         saveUserData(uuid);
         lastActive.remove(uuid);
+
+        // FIXED: Clear user configs when database is enabled (don't keep in memory)
+        if (useDatabaseStorage()) {
+            userConfigs.remove(uuid);
+        }
     }
 }

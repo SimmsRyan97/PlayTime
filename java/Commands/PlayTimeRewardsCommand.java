@@ -14,9 +14,11 @@ import com.whiteiverson.minecraft.playtime_plugin.UserHandler;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class PlayTimeRewardsCommand implements CommandExecutor {
@@ -34,7 +36,7 @@ public class PlayTimeRewardsCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         UUID targetUuid;
         String targetName;
 
@@ -88,7 +90,7 @@ public class PlayTimeRewardsCommand implements CommandExecutor {
 
         // Display rewards status
         sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.user")) + targetName + ":");
-        for (String rewardKey : rewardsConfig.getConfigurationSection("rewards").getKeys(false)) {
+        for (String rewardKey : Objects.requireNonNull(rewardsConfig.getConfigurationSection("rewards")).getKeys(false)) {
             String rewardName = rewardKey;
             double requiredTime = rewardsConfig.getDouble("rewards." + rewardKey + ".time");
 

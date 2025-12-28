@@ -10,8 +10,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,7 @@ public class PlayTimeTopCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) 
                 + main.getTranslator().getTranslation("error.player_only", null));
@@ -116,18 +118,30 @@ public class PlayTimeTopCommand implements CommandExecutor {
     }
 
     private List<UUID> getSortedPlayers() {
-        File dataFolder = new File(main.getDataFolder(), "data");
+        if (main.getDatabaseManager() != null && main.getDatabaseManager().isEnabled()) {
+            try {
+                return main.getUserDataManager().getAllUserUUIDs().stream()
+                        .map(UUID::fromString)
+                        .collect(Collectors.toList());
+            } catch (SQLException e) {
+                main.getLogger().severe("Failed to get player list from database: " + e.getMessage());
+                return Collections.emptyList();
+            }
+        } else {
+            // Your existing file-based code
+            File dataFolder = new File(main.getDataFolder(), "data");
 
-        if (!dataFolder.exists() || !dataFolder.isDirectory()) {
-            return Collections.emptyList();
+            if (!dataFolder.exists() || !dataFolder.isDirectory()) {
+                return Collections.emptyList();
+            }
+
+            return Arrays.stream(Bukkit.getOfflinePlayers())
+                    .map(OfflinePlayer::getUniqueId)
+                    .filter(uuid -> new File(dataFolder, uuid + ".yml").exists())
+                    .filter(uuid -> main.getUserHandler().getPlaytime(uuid) > 0)
+                    .sorted(Comparator.comparingDouble(main.getUserHandler()::getPlaytime).reversed())
+                    .collect(Collectors.toList());
         }
-
-        return Arrays.stream(Bukkit.getOfflinePlayers())
-                .map(OfflinePlayer::getUniqueId)
-                .filter(uuid -> new File(dataFolder, uuid + ".yml").exists())
-                .filter(uuid -> main.getUserHandler().getPlaytime(uuid) > 0)
-                .sorted(Comparator.comparingDouble(main.getUserHandler()::getPlaytime).reversed())
-                .collect(Collectors.toList());
     }
 
     private String resolveDisplayName(UUID uuid) {
@@ -135,11 +149,18 @@ public class PlayTimeTopCommand implements CommandExecutor {
         Player onlinePlayer = offlinePlayer.getPlayer();
 
         if (onlinePlayer != null && onlinePlayer.isOnline()) {
-            String prefix = vaultChat != null ? vaultChat.getPlayerPrefix(onlinePlayer) : "";
-            String suffix = vaultChat != null ? vaultChat.getPlayerSuffix(onlinePlayer) : "";
-            String nickname = prefix + onlinePlayer.getDisplayName() + suffix;
+            if (vaultChat != null) {
+                String prefix = vaultChat.getPlayerPrefix(onlinePlayer);
+                String suffix = vaultChat.getPlayerSuffix(onlinePlayer);
+                String displayName = onlinePlayer.getName(); // Use actual name, not display name
 
-            return ChatColor.stripColor(nickname);
+                // FIXED: Translate color codes instead of stripping them
+                String coloredPrefix = prefix != null ? main.getColorUtil().translateColor(prefix) : "";
+                String coloredSuffix = suffix != null ? main.getColorUtil().translateColor(suffix) : "";
+
+                return coloredPrefix + displayName + coloredSuffix;
+            }
+            return onlinePlayer.getName();
         }
 
         return offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";

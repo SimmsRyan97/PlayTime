@@ -45,6 +45,12 @@ public class PlayTimeHandler {
     }
     
     public void processPlayers() {
+        // Check if database is misconfigured
+        if (main.getConfig().getBoolean("database.enabled", false) && main.getUserDataManager() == null) {
+            main.getLogger().severe("Database is enabled but UserDataManager is null! Disabling database features.");
+            main.getConfig().set("database.enabled", false);
+        }
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
 
