@@ -36,8 +36,8 @@ PlayTime is designed for Minecraft servers, allowing users to effortlessly track
 
 ### 🗄️ Database Support
 
-- **MySQL**: Download MySQL driver: [mysql-connector-j-8.0.33.jar](https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar) and place in your plugins folder.
-- **SQLite**: Download SQLite driver: [sqlite-jdbc-3.42.0.0.jar](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar) and place in your plugins folder.
+- **MySQL**: Download MySQL driver: [mysql-connector-j-8.0.33.jar](https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar).
+- **SQLite**: Download SQLite driver: [sqlite-jdbc-3.42.0.0.jar](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar).
 
 ## Bug Reporting and Suggestions
 
