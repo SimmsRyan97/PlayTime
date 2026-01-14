@@ -11,9 +11,9 @@ import net.milkbowl.vault.chat.Chat;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 import com.whiteiverson.minecraft.playtime_plugin.UserHandler;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -78,7 +78,7 @@ public class PlayTimeRewardsCommand implements CommandExecutor {
         }
 
         // Load rewards
-        FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+        FileConfiguration rewardsConfig = Translator.loadYamlWithBomHandlingStatic(rewardsFile);
         if (!rewardsConfig.contains("rewards")) {
             sender.sendMessage(main.getTranslator().getTranslation("rewards.no_rewards", null));
             return true;

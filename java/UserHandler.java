@@ -3,7 +3,6 @@ package com.whiteiverson.minecraft.playtime_plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,6 +11,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,9 @@ public class UserHandler implements Listener {
         this.userDataFolder = new File(main.getDataFolder(), "data");
         this.rewardsFile = new File(main.getDataFolder(), "rewards.yml");
         if (!userDataFolder.exists()) {
-            userDataFolder.mkdirs(); // Create data directory if it doesn't exist
+            if (!userDataFolder.mkdirs()) {
+                main.getLogger().warning("Failed to create user data folder: " + userDataFolder.getAbsolutePath());
+            }
         }
     }
     
@@ -84,7 +87,7 @@ public class UserHandler implements Listener {
                 main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, 0.0, 0.0);
 
                 // Load rewards
-                FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+                FileConfiguration rewardsConfig = Translator.loadYamlWithBomHandlingStatic(rewardsFile);
                 if (rewardsConfig.contains("rewards")) {
                     for (String reward : Objects.requireNonNull(rewardsConfig.getConfigurationSection("rewards")).getKeys(false)) {
                         String rewardName = rewardsConfig.getString("rewards." + reward + ".name");
@@ -95,7 +98,6 @@ public class UserHandler implements Listener {
         } catch (SQLException e) {
             if (main.getConfig().getBoolean("logging.debug", false)) {
                 main.getLogger().severe("Failed to load user data from database: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
@@ -106,14 +108,16 @@ public class UserHandler implements Listener {
         FileConfiguration userConfig;
 
         if (userFile.exists()) {
-            userConfig = YamlConfiguration.loadConfiguration(userFile);
+            userConfig = Translator.loadYamlWithBomHandlingStatic(userFile);
         } else {
             try {
-                userFile.createNewFile();
-                userConfig = YamlConfiguration.loadConfiguration(userFile);
+                if (!userFile.createNewFile()) {
+                    main.getLogger().warning("Failed to create user file: " + userFile.getAbsolutePath());
+                }
+                userConfig = Translator.loadYamlWithBomHandlingStatic(userFile);
             } catch (IOException e) {
                 if (main.getConfig().getBoolean("logging.debug", false)) {
-                    main.getLogger().severe(e.getMessage());
+                    main.getLogger().severe("Failed to create user file: " + e.getMessage());
                 }
                 return;
             }
@@ -147,7 +151,7 @@ public class UserHandler implements Listener {
     }
 
     private void loadRewardsForUser(FileConfiguration userConfig) {
-        FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+        FileConfiguration rewardsConfig = Translator.loadYamlWithBomHandlingStatic(rewardsFile);
 
         // Initialise the rewards section if it doesn't exist
         if (!userConfig.contains("rewards")) {
@@ -229,6 +233,38 @@ public class UserHandler implements Listener {
         }
     }
 
+    public double getAfkTime(UUID uuid) {
+        if (useDatabaseStorage()) {
+            try {
+                return main.getUserDataManager().getAfkTime(uuid.toString());
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get afk time from database: " + e.getMessage());
+                }
+                return 0.0;
+            }
+        } else {
+            return getUserConfigValue(uuid, "afk-time", 0.0);
+        }
+    }
+
+    public boolean isRewardClaimed(UUID uuid, String rewardName) {
+        if (useDatabaseStorage()) {
+            try {
+                Map<String, Boolean> rewards = main.getUserDataManager().getRewards(uuid.toString());
+                return rewards.getOrDefault(rewardName, false);
+            } catch (SQLException e) {
+                if (main.getConfig().getBoolean("logging.debug", false)) {
+                    main.getLogger().severe("Failed to get reward status from database: " + e.getMessage());
+                }
+                return false;
+            }
+        } else {
+            Object data = getUserData(uuid, "rewards.claimed." + rewardName);
+            return data instanceof Boolean && (Boolean) data;
+        }
+    }
+
     public Object getUserData(UUID uuid, String key) {
         if (useDatabaseStorage()) {
             try {
@@ -304,13 +340,12 @@ public class UserHandler implements Listener {
             String username = player != null ? player.getName() : Bukkit.getOfflinePlayer(uuid).getName();
             String joinDate = (String) userData.getOrDefault("joined", setUserJoinDate(uuid));
             double playtime = getPlaytime(uuid);
-            double afkTime = getUserConfigValue(uuid, "afk-time", 0.0);
+            double afkTime = getAfkTime(uuid);
 
             main.getUserDataManager().saveUser(uuid.toString(), username, joinDate, playtime, afkTime);
         } catch (SQLException e) {
             if (main.getConfig().getBoolean("logging.debug", false)) {
                 main.getLogger().severe("Failed to save user data to database: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
@@ -332,8 +367,7 @@ public class UserHandler implements Listener {
             userConfig.save(userFile);
         } catch (IOException e) {
             if (main.getConfig().getBoolean("logging.debug", false)) {
-                main.getLogger().severe(e.getMessage());
-                e.printStackTrace();
+                main.getLogger().severe("Failed to save user data to file: " + e.getMessage());
             }
         }
     }
@@ -392,9 +426,7 @@ public class UserHandler implements Listener {
         long currentTime = System.currentTimeMillis();
         long lastActiveTime = lastActive.getOrDefault(uuid, 0L);
         
-        boolean afkStatus = (currentTime - lastActiveTime) > afkThreshold;
-        
-        return afkStatus;
+        return (currentTime - lastActiveTime) > afkThreshold;
     }
 
     /**

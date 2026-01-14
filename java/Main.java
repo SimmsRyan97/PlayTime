@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-//import com.whiteiverson.minecraft.playtime_plugin.Utilities.LibraryLoader;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,6 +24,7 @@ import com.whiteiverson.minecraft.playtime_plugin.Rewards.RewardsHandler;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.ColorUtil;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.PlaceHolder;
 import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.LibraryLoader;
 import org.jetbrains.annotations.NotNull;
 
 public class Main extends JavaPlugin {
@@ -62,6 +62,10 @@ public class Main extends JavaPlugin {
         // Output loading message
         getLogger().info(translator.getTranslation("plugin.loading", null));
 
+        // Load database libraries before initializing DatabaseManager
+        LibraryLoader libraryLoader = new LibraryLoader(getDataFolder(), getLogger());
+        libraryLoader.loadDependencies();
+
         // Initialise DatabaseManager and UserDataManager
         databaseManager = new DatabaseManager(getConfig(), getLogger(), getDataFolder());
 
@@ -75,12 +79,14 @@ public class Main extends JavaPlugin {
                 } else {
                     getLogger().warning("Database connection is null or closed. Falling back to flat-file storage.");
                     getConfig().set("database.enabled", false);
+                    saveConfig();
                 }
             } catch (SQLException e) {
                 getLogger().severe("Failed to connect to the database: " + e.getMessage());
                 getLogger().severe("Error type: " + e.getClass().getName());
                 getLogger().warning("Falling back to flat-file storage.");
                 getConfig().set("database.enabled", false);
+                saveConfig();
 
                 if (getConfig().getBoolean("logging.debug", false)) {
                     e.printStackTrace();
@@ -89,6 +95,7 @@ public class Main extends JavaPlugin {
                 getLogger().severe("Unexpected error during database initialization: " + e.getMessage());
                 getLogger().warning("Falling back to flat-file storage.");
                 getConfig().set("database.enabled", false);
+                saveConfig();
 
                 if (getConfig().getBoolean("logging.debug", false)) {
                     e.printStackTrace();

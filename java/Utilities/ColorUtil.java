@@ -41,7 +41,7 @@ public class ColorUtil {
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("&#([A-Fa-f0-9]{6})");
             java.util.regex.Matcher matcher = pattern.matcher(input);
 
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while (matcher.find()) {
                 String hex = matcher.group(1);
                 try {
@@ -65,11 +65,11 @@ public class ColorUtil {
         String[] versionParts = version.split("\\.");
 
         try {
-            int majorVersion = Integer.parseInt(versionParts[0].replaceAll("[^\\d]", ""));
-            int minorVersion = versionParts.length > 1 ? Integer.parseInt(versionParts[1].replaceAll("[^\\d]", "")) : 0;
+            int majorVersion = Integer.parseInt(versionParts[0].replaceAll("\\D", ""));
+            int minorVersion = versionParts.length > 1 ? Integer.parseInt(versionParts[1].replaceAll("\\D", "")) : 0;
             return majorVersion > 1 || (majorVersion == 1 && minorVersion >= 16);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            // Failed to parse version, assume hex colors not supported
         }
 
         return false;

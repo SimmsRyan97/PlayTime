@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("SqlNoDataSourceInspection")
 public class UserDataManager {
     private final DatabaseManager databaseManager;
 

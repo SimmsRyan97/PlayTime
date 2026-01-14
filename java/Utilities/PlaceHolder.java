@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
 
@@ -17,16 +18,19 @@ public class PlaceHolder extends PlaceholderExpansion {
     }
 
     @Override
+    @NotNull
     public String getIdentifier() {
         return "playtime"; // The identifier used in PlaceholderAPI
     }
 
     @Override
+    @NotNull
     public String getAuthor() {
         return main.getDescription().getAuthors().toString();
     }
 
     @Override
+    @NotNull
     public String getVersion() {
         return main.getDescription().getVersion();
     }
@@ -37,7 +41,7 @@ public class PlaceHolder extends PlaceholderExpansion {
     }
     
     @Override
-    public String onRequest(OfflinePlayer offlinePlayer, String identifier) {
+    public String onRequest(OfflinePlayer offlinePlayer, @NotNull String identifier) {
         if (offlinePlayer == null) {
             return "";  // Safely return an empty string if called without a player
         }

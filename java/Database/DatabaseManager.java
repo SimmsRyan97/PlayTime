@@ -1,6 +1,9 @@
 // DatabaseManager.java
 package com.whiteiverson.minecraft.playtime_plugin.Database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +13,7 @@ import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class DatabaseManager {
+    private HikariDataSource dataSource;
     private Connection connection;
     private final FileConfiguration config;
     private final Logger logger;
@@ -54,7 +58,20 @@ public class DatabaseManager {
                 String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName
                         + "?autoReconnect=" + config.getBoolean("database.database_options.auto_reconnect")
                         + "&connectTimeout=" + (config.getInt("database.database_options.connection_timeout") * 1000);
-                connection = DriverManager.getConnection(url, user, pass);
+                
+                // Create HikariCP connection pool
+                HikariConfig hikariConfig = new HikariConfig();
+                hikariConfig.setJdbcUrl(url);
+                hikariConfig.setUsername(user);
+                hikariConfig.setPassword(pass);
+                hikariConfig.setMaximumPoolSize(10);
+                hikariConfig.setMinimumIdle(2);
+                hikariConfig.setConnectionTimeout(config.getInt("database.database_options.connection_timeout") * 1000L);
+                hikariConfig.setIdleTimeout(600000); // 10 minutes
+                hikariConfig.setMaxLifetime(1800000); // 30 minutes
+                
+                dataSource = new HikariDataSource(hikariConfig);
+                connection = dataSource.getConnection();
 
             } else if ("sqlite".equals(dbType)) {
                 // Check if SQLite driver is available
@@ -74,7 +91,15 @@ public class DatabaseManager {
                 File dbFile = new File(dataFolder, filePath);
 
                 String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
-                connection = DriverManager.getConnection(url);
+                
+                // Create HikariCP connection pool for SQLite
+                HikariConfig hikariConfig = new HikariConfig();
+                hikariConfig.setJdbcUrl(url);
+                hikariConfig.setMaximumPoolSize(5); // SQLite handles fewer concurrent connections
+                hikariConfig.setMinimumIdle(1);
+                
+                dataSource = new HikariDataSource(hikariConfig);
+                connection = dataSource.getConnection();
 
                 logger.info("SQLite database location: " + dbFile.getAbsolutePath());
             }
@@ -158,6 +183,14 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             logger.severe("Error closing the database connection: " + e.getMessage());
+        }
+        
+        try {
+            if (dataSource != null && !dataSource.isClosed()) {
+                dataSource.close();
+            }
+        } catch (Exception e) {
+            logger.severe("Error closing the HikariCP datasource: " + e.getMessage());
         }
     }
 }

@@ -12,13 +12,21 @@ import java.util.logging.Logger;
 
 public class LibraryLoader {
     private final File libFolder;
+    private final File librariesFolder;
     private final Logger logger;
 
     public LibraryLoader(File dataFolder, Logger logger) {
         this.libFolder = new File(dataFolder, "lib");
         this.logger = logger;
+
+        // Paper stores libraries in a 'libraries' folder relative to the server root
+        File parentDir = dataFolder.getParentFile();
+        this.librariesFolder = parentDir != null ? new File(parentDir, "libraries") : null;
+
         if (!libFolder.exists()) {
-            libFolder.mkdirs();
+            if (!libFolder.mkdirs()) {
+                logger.warning("Failed to create lib folder: " + libFolder.getAbsolutePath());
+            }
         }
     }
 
@@ -47,9 +55,15 @@ public class LibraryLoader {
     }
 
     private boolean loadLibrary(String name, String version, String downloadUrl) {
-        File libFile = new File(libFolder, name + "-" + version + ".jar");
+        // Check Paper's libraries folder first
+        File libFile = checkPaperLibraries(name, version);
 
-        // Download if not exists
+        // If not found in Paper libraries, check plugin lib folder
+        if (libFile == null) {
+            libFile = new File(libFolder, name + "-" + version + ".jar");
+        }
+
+        // Download if not exists anywhere
         if (!libFile.exists()) {
             logger.info("Downloading " + name + " " + version + "...");
             try {
@@ -57,7 +71,6 @@ public class LibraryLoader {
                 logger.info("Successfully downloaded " + name);
             } catch (IOException e) {
                 logger.severe("Failed to download " + name + ": " + e.getMessage());
-                e.printStackTrace();
                 return false;
             }
         } else {
@@ -77,9 +90,40 @@ public class LibraryLoader {
             return true;
         } catch (Exception e) {
             logger.severe("Failed to load " + name + " into classpath: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Check if a library exists in Paper's libraries folder
+     * Paper stores libraries in a folder structure like: libraries/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar
+     */
+    private File checkPaperLibraries(String name, String version) {
+        if (librariesFolder == null || !librariesFolder.exists()) {
+            return null;
+        }
+
+        // Map library names to their Maven coordinates
+        String groupId = null;
+        String artifactId = null;
+
+        if (name.equals("mysql-connector-j")) {
+            groupId = "com/mysql";
+            artifactId = "mysql-connector-j";
+        } else if (name.equals("sqlite-jdbc")) {
+            groupId = "org/xerial";
+            artifactId = "sqlite-jdbc";
+        }
+
+        if (groupId != null && artifactId != null) {
+            File paperLib = new File(librariesFolder, groupId + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".jar");
+            if (paperLib.exists()) {
+                logger.info("Found " + name + " in Paper libraries: " + paperLib.getAbsolutePath());
+                return paperLib;
+            }
+        }
+
+        return null;
     }
 
     private void downloadFile(String urlString, File destination) throws IOException {

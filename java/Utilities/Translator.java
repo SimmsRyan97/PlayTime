@@ -27,11 +27,22 @@ public class Translator {
         loadDefaultLanguage();
     }
 
+    /**
+     * Static utility method to load YAML files
+     * Can be used by other classes
+     */
+    public static FileConfiguration loadYamlWithBomHandlingStatic(File file) {
+        // YamlConfiguration.loadConfiguration handles BOM automatically
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
     // Updated loadLanguageFiles() as described above
     private void loadLanguageFiles() {
         File langFolder = new File(main.getDataFolder(), "lang");
         if (!langFolder.exists()) {
-            langFolder.mkdirs();
+            if (!langFolder.mkdirs()) {
+                main.getLogger().warning("Failed to create lang folder: " + langFolder.getAbsolutePath());
+            }
         }
 
         // First, copy language files from JAR (existing code)
@@ -72,10 +83,19 @@ public class Translator {
         if (langFiles != null) {
             for (File langFile : langFiles) {
                 String langKey = langFile.getName().replace(".yml", "").toLowerCase();
-                loadedLanguages.put(langKey, YamlConfiguration.loadConfiguration(langFile));
+                FileConfiguration config = loadYamlWithBomHandling(langFile);
+                loadedLanguages.put(langKey, config);
                 main.getLogger().info("Loaded language file: " + langKey);
             }
         }
+    }
+
+    /**
+     * Load YAML configuration
+     */
+    private FileConfiguration loadYamlWithBomHandling(File file) {
+        // YamlConfiguration.loadConfiguration handles BOM automatically
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     public void loadDefaultLanguage() {
@@ -92,12 +112,10 @@ public class Translator {
 
     public String getPlayerLocale(Player player) {
         String localeStr = player.getLocale(); // This returns a String, not a Locale object
-        if (localeStr != null && localeStr.contains("_")) {
+        if (localeStr.contains("_")) {
             return localeStr.split("_")[0].toLowerCase();  // Extract the language code (e.g., "en", "fr")
-        } else if (localeStr != null) {
-            return localeStr.toLowerCase();  // If there's no underscore, return the entire locale string in lowercase
         } else {
-            return "en";  // Fallback to English if the locale is null
+            return localeStr.toLowerCase();  // If there's no underscore, return the entire locale string in lowercase
         }
     }
 
@@ -109,7 +127,7 @@ public class Translator {
             return loadedLanguages.get("messages_" + lang);
         } else {
             main.getLogger().warning("Language file for '" + lang + "' not found. Falling back to default language.");
-            return YamlConfiguration.loadConfiguration(defaultLangFile);
+            return loadYamlWithBomHandling(defaultLangFile);
         }
     }
 
@@ -117,10 +135,8 @@ public class Translator {
     public String getTranslation(String key, Object sender) {
     	
         // Determine if the sender is a Player
-        Player player = null;
-
         if (sender instanceof Player) {
-            player = (Player) sender;
+            Player player = (Player) sender;
             
             String lang = getPlayerLocale(player);  // Get player's language
             FileConfiguration langConfig = getLanguageConfig(lang);  // Load the corresponding language file
@@ -134,7 +150,7 @@ public class Translator {
 
     // Fetching translated string for the console
     public String getConsoleTranslation(String key) {
-        FileConfiguration langConfig = YamlConfiguration.loadConfiguration(defaultLangFile);
+        FileConfiguration langConfig = loadYamlWithBomHandling(defaultLangFile);
         return langConfig.getString(key, "Translation not found for key: " + key);
     }
 }

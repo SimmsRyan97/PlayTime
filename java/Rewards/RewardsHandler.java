@@ -4,19 +4,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.whiteiverson.minecraft.playtime_plugin.Main;
+import com.whiteiverson.minecraft.playtime_plugin.Utilities.Translator;
 
 import com.earth2me.essentials.Essentials;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.*;
 
 public class RewardsHandler {
-    private Main main;
+    private final Main main;
     private Set<Rewards> rewards;
     private static final int MILLISECONDS_IN_SECOND = 1000;
 
@@ -42,7 +42,7 @@ public class RewardsHandler {
             main.saveResource("rewards.yml", false);
         }
 
-        FileConfiguration rewardsConfig = YamlConfiguration.loadConfiguration(rewardsFile);
+        FileConfiguration rewardsConfig = Translator.loadYamlWithBomHandlingStatic(rewardsFile);
         rewards = new TreeSet<>();
 
         // Ensure rewards section exists in the configuration
@@ -183,23 +183,7 @@ public class RewardsHandler {
      * @return True if the reward has been claimed, false otherwise.
      */
     private boolean hasRewardBeenClaimed(UUID uuid, Rewards reward) {
-        Object data = main.getUserHandler().getUserData(uuid, "rewards.claimed." + reward.getName());
-
-        // FIXED: Handle database returning null for non-existent keys
-        if (data == null) {
-            return false;
-        }
-
-        if (data instanceof Boolean) {
-            return (Boolean) data;
-        }
-
-        // Handle Integer from SQLite
-        if (data instanceof Integer) {
-            return ((Integer) data) != 0;
-        }
-
-        return false;
+        return main.getUserHandler().isRewardClaimed(uuid, reward.getName());
     }
 
     /**

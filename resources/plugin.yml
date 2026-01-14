@@ -1,10 +1,10 @@
 name: PlayTime
 version: 1.8.1
 main: com.whiteiverson.minecraft.playtime_plugin.Main
-api-version: 1.18
+api-version: 1.8
 author: WhiteIverson97
 description: A plugin that saves playtime and gives rewards based on total playtime
-website: 'https://www.spigotmc.org/resources/playtime.120015/'
+website: "https://www.spigotmc.org/resources/playtime.120015/"
 softdepend: [PlaceholderAPI, EssentialsX, DiscordSRV, Vault]
 
 commands:
@@ -16,7 +16,7 @@ commands:
     permission: playtime.check
   pttop:
     description: Shows the top players by playtime
-    usage: '/pttop [page]'
+    usage: "/pttop [page]"
     aliases:
       - playtimetop
     permission: playtime.top
@@ -37,10 +37,10 @@ permissions:
     description: gives all playtime permissions
     default: false
     children:
-        playtime.check: true
-        playtime.top: true
-        playtime.reload: true
-        playtime.rewards: true
+      playtime.check: true
+      playtime.top: true
+      playtime.reload: true
+      playtime.rewards: true
   playtime.check:
     description: Allows players to check their playtime.
     default: true

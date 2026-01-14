@@ -1,5 +1,5 @@
 # General configuration
-lang: "en" # Set to your desired console language - see list in lang folder
+lang: "en" # Set this to your desired language for the server console - individual users will have messages translated automatically
 
 rewards:
   enabled: true # Master toggle to enable/disable the rewards system
