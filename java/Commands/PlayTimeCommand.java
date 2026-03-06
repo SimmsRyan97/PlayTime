@@ -49,12 +49,6 @@ public class PlayTimeCommand implements CommandExecutor {
         } else {
             playerName = args[0];
 
-            if (sender instanceof Player && !sender.hasPermission("playtime.check")) {
-                sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
-                        main.getTranslator().getTranslation("error.no_permission", sender));
-                return true;
-            }
-
             // Attempt to resolve the player using nickname first
             Player onlinePlayer = resolvePlayerByNickname(playerName);
             if (onlinePlayer != null) {
@@ -72,6 +66,19 @@ public class PlayTimeCommand implements CommandExecutor {
                             main.getTranslator().getTranslation("error.no_user", sender));
                     return true;
                 }
+            }
+
+            // Treat /pt <own-name> the same as /pt with no args.
+            if (sender instanceof Player) {
+                Player senderPlayer = (Player) sender;
+                isSelf = targetUUID.equals(senderPlayer.getUniqueId());
+            }
+
+            // Only require permission when checking another player.
+            if (sender instanceof Player && !isSelf && !sender.hasPermission("playtime.check")) {
+                sender.sendMessage(main.getColorUtil().translateColor(main.getConfig().getString("color.error")) +
+                        main.getTranslator().getTranslation("error.no_permission", sender));
+                return true;
             }
         }
 
