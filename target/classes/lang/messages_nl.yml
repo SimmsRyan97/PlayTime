@@ -1,0 +1,44 @@
+#Nederlandse vertaling
+playtime:
+  self: "Jouw speeltijd is %s %s, %s %s, %s %s, %s %s en %s %s. Je bent toegetreden op %s."
+  other: "De speeltijd van %s is %s %s, %s %s, %s %s, %s %s en %s %s. Hij/zij is toegetreden op %s."
+  time:
+    months: 
+      singular: "maand"
+      plural: "maanden"
+    days: 
+      singular: "dag"
+      plural: "dagen"
+    hours: 
+      singular: "uur"
+      plural: "uren"
+    minutes: 
+      singular: "minuut"
+      plural: "minuten"
+    seconds: 
+      singular: "seconde"
+      plural: "seconden"
+  top: "Top Speeltijd (Pagina "
+  no_user: "Geen spelers gevonden."
+  invalid_page: "Ongeldig paginanummer. "
+  enter_page: "Voer een nummer in tussen 1 en "
+  go_to: "Ga naar pagina "
+  page_one: "Pagina 1 weergeven."
+error:
+  no_user: "Gebruiker bestaat niet."
+  no_permission: "Je hebt geen toestemming om dit commando te gebruiken."
+  command_disabled: "Dit commando is momenteel uitgeschakeld."
+  player_only: "Dit commando kan alleen door een speler worden uitgevoerd."
+plugin:
+  loading: "PlayTime-plugin is aan het laden..."
+  load_success: "PlayTime-plugin succesvol geladen!"
+  reload: "Pluginconfiguratie succesvol herladen."
+user:
+  initial: "Initiële speeltijd instellen voor gebruiker: "
+  not_found: "Statistiekbestand niet gevonden voor UUID: "
+rewards:
+  invalid_key: "Ongeldige beloningsconfiguratie voor sleutel: "
+  no_rewards: "Geen beloningssectie gevonden in het rewards.yml-configuratiebestand!"
+  earned: " heeft de beloning verdiend: "
+  achieved: "Bereikt"
+  not_achieved: "Niet bereikt"

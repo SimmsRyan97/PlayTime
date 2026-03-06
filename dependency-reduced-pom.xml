@@ -7,11 +7,12 @@
   <version>1.8.2</version>
   <description>A plugin that saves playtime and gives rewards based on total playtime</description>
   <build>
+    <sourceDirectory>java</sourceDirectory>
     <defaultGoal>clean package</defaultGoal>
     <resources>
       <resource>
         <filtering>true</filtering>
-        <directory>src/main/resources</directory>
+        <directory>resources</directory>
       </resource>
     </resources>
     <finalName>${project.name}-${project.version}</finalName>

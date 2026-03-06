@@ -1,0 +1,44 @@
+#English Translation
+playtime:
+  self: "Your play time is %s %s, %s %s, %s %s, %s %s, and %s %s. You joined on %s."
+  other: "%s's play time is %s %s, %s %s, %s %s, %s %s, and %s %s. They joined on %s."
+  time:
+    months: 
+      singular: "month"
+      plural: "months"
+    days: 
+      singular: "day"
+      plural: "days"
+    hours: 
+      singular: "hour"
+      plural: "hours"
+    minutes: 
+      singular: "minute"
+      plural: "minutes"
+    seconds: 
+      singular: "second"
+      plural: "seconds"
+  top: "Top Play time (Page "
+  no_user: "No players found."
+  invalid_page: "Invalid page number. "
+  enter_page: "Please enter a number between 1 and "
+  go_to: "Go to page "
+  page_one: "Showing page 1."
+error:
+  no_user: "User doesn't exist."
+  no_permission: "You do not have permission to use this command."
+  command_disabled: "This command is currently disabled."
+  player_only: "This command can only be executed by a player."
+plugin:
+  loading: "PlayTime plugin is loading..."
+  load_success:  "PlayTime plugin loaded successfully!"
+  reload: "Plugin configuration reloaded successfully."
+user:
+  initial: "Setting initial playtime for user: "
+  not_found: "Stats file not found for UUID: "
+rewards:
+  invalid_key: "Invalid reward configuration for key: "
+  no_rewards: "No rewards section found in the rewards.yml config!"
+  earned: " has earned the reward: "
+  achieved: "Achieved"
+  not_achieved: "Not achieved"

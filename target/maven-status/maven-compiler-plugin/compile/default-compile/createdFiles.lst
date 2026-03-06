@@ -1,0 +1,15 @@
+com\whiteiverson\minecraft\playtime_plugin\PlayTimeHandler.class
+com\whiteiverson\minecraft\playtime_plugin\UserHandler.class
+com\whiteiverson\minecraft\playtime_plugin\Database\DatabaseManager.class
+com\whiteiverson\minecraft\playtime_plugin\Rewards\RewardsHandler.class
+com\whiteiverson\minecraft\playtime_plugin\TickTask.class
+com\whiteiverson\minecraft\playtime_plugin\Database\UserDataManager.class
+com\whiteiverson\minecraft\playtime_plugin\Commands\PlayTimeRewardsCommand.class
+com\whiteiverson\minecraft\playtime_plugin\Utilities\Translator.class
+com\whiteiverson\minecraft\playtime_plugin\Commands\PlayTimeTopCommand.class
+com\whiteiverson\minecraft\playtime_plugin\Utilities\PlaceHolder.class
+com\whiteiverson\minecraft\playtime_plugin\Commands\PlayTimeCommand.class
+com\whiteiverson\minecraft\playtime_plugin\Main.class
+com\whiteiverson\minecraft\playtime_plugin\Utilities\ColorUtil.class
+com\whiteiverson\minecraft\playtime_plugin\Rewards\Rewards.class
+com\whiteiverson\minecraft\playtime_plugin\Utilities\LibraryLoader.class

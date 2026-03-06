@@ -1,0 +1,48 @@
+# Playtime | rewards.yml
+# 
+# This config file manages all of the rewards for the plugin.
+# Each reward has a name, amount of time needed to trigger the reward, and commands to run when the reward is activated.
+# Please ensure each reward has a different ID. The ID does not have to be a number and is not used.
+
+rewards:
+  Copper: # Copper rank reward for 12 hours of playtime
+    name: "Copper - 12 hours"
+    time: 43200.0  # Time in seconds
+    commands:
+      - "lp user %player% promote time-ranks"  # Command to add the 'regular' rank
+
+  Iron: # Iron rank reward for 1 day of playtime
+    name: "Iron - 1 day"
+    time: 86400.0
+    commands:
+      - "lp user %player% promote time-ranks"
+
+  Gold: # Gold rank reward for 3 days of playtime
+    name: "Gold - 3 days"
+    time: 259200.0
+    commands:
+      - "lp user %player% promote time-ranks"
+
+  Lapis: # Lapis rank reward for 1 week of playtime
+    name: "Lapis - 1 week"
+    time: 604800.0
+    commands:
+      - "lp user %player% promote time-ranks"
+
+  Diamond: # Diamond rank reward for 2 weeks of playtime
+    name: "Diamond - 2 weeks"
+    time: 1209600.0
+    commands:
+      - "lp user %player% promote time-ranks"
+
+  Emerald: # Emerald rank reward for 1 month of playtime
+    name: "Emerald - 1 month"
+    time: 2629800.0
+    commands:
+      - "lp user %player% promote time-ranks"
+
+  Netherite: # Netherite rank reward for 3 months of playtime
+    name: "Netherite - 3 months"
+    time: 7889400.0
+    commands:
+      - "lp user %player% promote time-ranks"

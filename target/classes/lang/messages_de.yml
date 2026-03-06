@@ -1,0 +1,44 @@
+#Deutsche Übersetzung - Danken an schildkroet05 und sylfori (Chaos)
+playtime:
+  self: "Deine Spielzeit beträgt %s %s, %s %s, %s %s, %s %s und %s %s. Du bist am %s beigetreten."
+  other: "%s's Spielzeit beträgt %s %s, %s %s, %s %s, %s %s und %s %s. Sie sind am %s beigetreten."
+  time:
+    months: 
+      singular: "Monat"
+      plural: "Monate"
+    days: 
+      singular: "Tag"
+      plural: "Tage"
+    hours: 
+      singular: "Stunde"
+      plural: "Stunden"
+    minutes: 
+      singular: "Minute"
+      plural: "Minuten"
+    seconds: 
+      singular: "Sekunde"
+      plural: "Sekunden"
+  top: "Top Spielzeit (Seite "
+  no_user: "Keine Spieler gefunden."
+  invalid_page: "Ungültige Seitenzahl. "
+  enter_page: "Bitte geben Sie eine Zahl zwischen 1 und "
+  go_to: "Gehe zu Seite "
+  page_one: "Zeige Seite 1."
+error:
+  no_user: "Benutzer existiert nicht."
+  no_permission: "Du hast keine Berechtigung, diesen Befehl zu verwenden."
+  command_disabled: "Dieser Befehl ist derzeit deaktiviert."
+  player_only: "Dieser Befehl kann nur von einem Spieler ausgeführt werden."
+plugin:
+  loading: "Das PlayTime-Plugin wird geladen..."
+  load_success: "Das PlayTime-Plugin wurde erfolgreich geladen!"
+  reload: "Die Plugin-Konfiguration wurde erfolgreich neu geladen."
+user:
+  initial: "Setze die anfängliche Spielzeit für Benutzer: "
+  not_found: "Statistiken-Datei für UUID nicht gefunden: "
+rewards:
+  invalid_key: "Ungültige Belohnungskonfiguration für Schlüssel: "
+  no_rewards: "Im rewards.yml-Configabschnitt wurden keine Belohnungen gefunden!"
+  earned: " hat die Belohnung verdient: "
+  achieved: "Erreicht"
+  not_achieved: "Nicht erreicht"

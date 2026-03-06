@@ -1,0 +1,44 @@
+#Traduzione italiana
+playtime:
+  self: "Il tuo tempo di gioco è %s %s, %s %s, %s %s, %s %s e %s %s. Ti sei unito il %s."
+  other: "Il tempo di gioco di %s è %s %s, %s %s, %s %s, %s %s e %s %s. Si è unito il %s."
+  time:
+    months: 
+      singular: "mese"
+      plural: "mesi"
+    days: 
+      singular: "giorno"
+      plural: "giorni"
+    hours: 
+      singular: "ora"
+      plural: "ore"
+    minutes: 
+      singular: "minuto"
+      plural: "minuti"
+    seconds: 
+      singular: "secondo"
+      plural: "secondi"
+  top: "Tempo di gioco massimo (Pagina "
+  no_user: "Nessun giocatore trovato."
+  invalid_page: "Numero di pagina non valido. "
+  enter_page: "Per favore, inserisci un numero tra 1 e "
+  go_to: "Vai alla pagina "
+  page_one: "Mostrando pagina 1."
+error:
+  no_user: "L'utente non esiste."
+  no_permission: "Non hai il permesso di utilizzare questo comando."
+  command_disabled: "Questo comando è attualmente disabilitato."
+  player_only: "Questo comando può essere eseguito solo da un giocatore."
+plugin:
+  loading: "Il plugin PlayTime si sta caricando..."
+  load_success: "Plugin PlayTime caricato con successo!"
+  reload: "Configurazione del plugin ricaricata con successo."
+user:
+  initial: "Impostazione del tempo di gioco iniziale per l'utente: "
+  not_found: "File statistiche non trovato per UUID: "
+rewards:
+  invalid_key: "Configurazione della ricompensa non valida per la chiave: "
+  no_rewards: "Nessuna sezione ricompense trovata nella configurazione rewards.yml!"
+  earned: " ha guadagnato la ricompensa: "
+  achieved: "Raggiunto"
+  not_achieved: "Non raggiunto"

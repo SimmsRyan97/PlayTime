@@ -1,0 +1,44 @@
+#Tradução para o português - obrigado por L.E.S.F
+playtime:
+  self: "O seu tempo de jogo é %s %s, %s %s, %s %s, %s %s e %s %s. Você entrou em %s."
+  other: "O tempo de jogo de %s é %s %s, %s %s, %s %s, %s %s e %s %s. Ele(a) entrou em %s."
+  time:
+    months: 
+      singular: "mês"
+      plural: "meses"
+    days: 
+      singular: "dia"
+      plural: "dias"
+    hours: 
+      singular: "hora"
+      plural: "horas"
+    minutes: 
+      singular: "minuto"
+      plural: "minutos"
+    seconds: 
+      singular: "segundo"
+      plural: "segundos"
+  top: "Tempo de jogo em alta (Página "
+  no_user: "Nenhum jogador encontrado."
+  invalid_page: "Número de página inválido. "
+  enter_page: "Por favor, insira um número entre 1 e "
+  go_to: "Ir para a página "
+  page_one: "Mostrando a página 1."
+error:
+  no_user: "Usuário não existe."
+  no_permission: "Você não tem permissão para usar este comando."
+  command_disabled: "Este comando está desativado no momento."
+  player_only: "Este comando só pode ser executado por um jogador."
+plugin:
+  loading: "O plugin PlayTime está carregando..."
+  load_success: "Plugin PlayTime carregado com sucesso!"
+  reload: "A configuração do plugin foi recarregada com sucesso."
+user:
+  initial: "Definindo o tempo de jogo inicial para o usuário: "
+  not_found: "Arquivo de estatísticas não encontrado para o UUID: "
+rewards:
+  invalid_key: "Configuração de recompensa inválida para a chave: "
+  no_rewards: "Nenhuma seção de recompensas encontrada no arquivo rewards.yml!"
+  earned: " ganhou a recompensa: "
+  achieved: "Alcançado"
+  not_achieved: "Não alcançado"

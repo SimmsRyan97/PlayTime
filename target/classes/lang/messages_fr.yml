@@ -1,0 +1,44 @@
+#Traduction Francaise - merci à Siphayeur
+playtime:
+  self: "Votre temps de jeu est de %s %s, %s %s, %s %s, %s %s et %s %s. Vous avez rejoint le %s."
+  other: "Le temps de jeu de %s est de %s %s, %s %s, %s %s, %s %s et %s %s. Ils ont rejoint le %s."
+  time:
+    months: 
+      singular: "mois"
+      plural: "mois"
+    days: 
+      singular: "jour"
+      plural: "jours"
+    hours: 
+      singular: "heure"
+      plural: "heures"
+    minutes: 
+      singular: "minute"
+      plural: "minutes"
+    seconds: 
+      singular: "seconde"
+      plural: "secondes"
+  top: "Temps de jeu supérieur (Page "
+  no_user: "Aucun joueur trouvé."
+  invalid_page: "Numéro de page invalide. "
+  enter_page: "Veuillez entrer un nombre entre 1 et "
+  go_to: "Aller à la page "
+  page_one: "Affichage de la page 1."
+error:
+  no_user: "L'utilisateur n'existe pas."
+  no_permission: "Vous n'avez pas la permission d'utiliser cette commande."
+  command_disabled: "Cette commande est actuellement désactivée."
+  player_only: "Cette commande ne peut être exécutée que par un joueur."
+plugin:
+  loading: "Le plugin PlayTime est en cours de chargement..."
+  load_success: "Le plugin PlayTime a été chargé avec succès!"
+  reload: "La configuration du plugin a été rechargée avec succès."
+user:
+  initial: "Définir le temps de jeu initial pour l'utilisateur: "
+  not_found: "Fichier de statistiques non trouvé pour l'UUID: "
+rewards:
+  invalid_key: "Configuration de récompense invalide pour la clé : "
+  no_rewards: "Aucune section de récompenses trouvée dans la configuration rewards.yml!"
+  earned: " a gagné la récompense: "
+  achieved: "Atteint"
+  not_achieved: "Non atteint"

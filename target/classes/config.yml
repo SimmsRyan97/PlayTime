@@ -1,0 +1,77 @@
+# General configuration
+lang: "en" # Set this to your desired language for the server console - individual users will have messages translated automatically
+
+rewards:
+  enabled: true # Master toggle to enable/disable the rewards system
+  broadcast:
+    chat: true # Whether to broadcast messages to the server when rewards are given
+    discord: false # Whether to broadcast messages to the Discord server-chat when rewards are given (requires DiscordSRV or EssentialsXDiscord)
+  reward-cooldown: 60 # Minimum time (in seconds) between processing rewards for the same player
+
+playtime:
+  auto-save-interval: 300  # How often (in seconds) playtime data is auto-saved to the database
+  page-size: 10 # How many players per page in /pttop
+  
+track-afk:
+  enabled: false  # If true, afk-time is recorded causing play time to be paused when user is AFK
+  afk-detection: 300000 # Time (in miliseconds) until player becomes AFK - default is 5 minutes
+
+commands:
+  pt:
+    enabled: true  # Enable/disable the /pt (playtime) command
+  pttop:
+    enabled: true  # Enable/disable the /pttop command
+  ptreload:
+    enabled: true # Enable/disable the /ptreload command
+
+logging:
+  debug: false  # Enable debug logging
+  reward-claims: true  # Log every reward claim to the server console
+
+
+# -------------------------------------------------------------------------------- #
+
+
+# Database configuration
+database:
+  enabled: false # Enable/disable the use of a database for data storage
+
+  # Type of database being used (MySQL, SQLite, etc.)
+  type: "MySQL"  # Options: "MySQL", "SQLite"
+    
+  # MySQL Configuration (used only if type is "MySQL")
+  mysql:
+    host: "localhost"         # The host where the database is located
+    port: 3306                # The port number for MySQL (3306 is the default)
+    database_name: "playtime_db"  # The name of the database to use
+    username: "root"          # The database user
+    password: "password"      # The password for the database user
+      
+  # SQLite Configuration (used only if type is "SQLite")
+  sqlite:
+    file: "playtime_data.db"  # The SQLite database file to store data in
+    
+  # Additional optional settings
+  database_options:
+    auto_reconnect: true        # Whether to auto-reconnect on lost connections
+    connection_timeout: 30      # Connection timeout in seconds
+
+
+# -------------------------------------------------------------------------------- #
+
+
+# Color configuration - use Minecraft chat codes (1.16 or below) e.g. &c or hex codes e.g. #FF5555 (1.16+)
+color:
+  integer: "#FFFFFF" # Numbers used in total play time
+  interval: "#55FF55" # Words following integer e.g. month
+  header: "#FFAA00" # Color of the top bar in /pttop
+  footer: "#FFAA00" # Color of the bottom bar in /pttop
+  list-item: "#FFFFFF" # List number on /pttop
+  error: "#FF5555" # Any error message
+  success: "#55FF55" # Any success message
+  user: "#FFFFFF" # Any username
+  earned: "#FFFFFF" # Reward message e.g. "...has earned"
+  reward: "#FFFFFF" # Name of reward
+
+
+# -------------------------------------------------------------------------------- #
