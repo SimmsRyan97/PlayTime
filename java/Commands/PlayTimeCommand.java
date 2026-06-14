@@ -49,8 +49,15 @@ public class PlayTimeCommand implements CommandExecutor {
         } else {
             playerName = args[0];
 
-            // Attempt to resolve the player using nickname first
-            Player onlinePlayer = resolvePlayerByNickname(playerName);
+            // Resolve online players first so first-join players can be queried before logout.
+            Player onlinePlayer = Bukkit.getPlayerExact(playerName);
+            if (onlinePlayer == null) {
+                onlinePlayer = Bukkit.getPlayer(playerName);
+            }
+            if (onlinePlayer == null) {
+                onlinePlayer = resolvePlayerByNickname(playerName);
+            }
+
             if (onlinePlayer != null) {
                 targetUUID = onlinePlayer.getUniqueId();
                 playerName = getFormattedPlayerName(onlinePlayer); // FIXED: Get formatted name with prefix/suffix
