@@ -4,7 +4,7 @@
   <groupId>com.whiteiverson.minecraft</groupId>
   <artifactId>playtime-plugin</artifactId>
   <name>PlayTime</name>
-  <version>1.8.2</version>
+  <version>1.8.3</version>
   <description>A plugin that saves playtime and gives rewards based on total playtime</description>
   <build>
     <sourceDirectory>java</sourceDirectory>
